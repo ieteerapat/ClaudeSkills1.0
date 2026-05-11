@@ -1,139 +1,167 @@
 # Claude Code MCP Optimizer
 
-A drop-in skills package for Claude Code that reduces token drain when working with MCP servers (especially Figma MCP) and enforces token-efficient communication patterns.
+A drop-in skills package for Claude Code that reduces token drain when working with MCP servers (especially Figma MCP), enforces token-efficient communication, and provides hooks for automated waste prevention.
 
 ## What's Included
 
 ```
 claude-code-mcp-optimizer/
-├── CLAUDE.md                          # Project-level rules (terse output, MCP discipline)
+├── CLAUDE.md                              # Project-level rules (terse output, MCP discipline, model routing)
 ├── .claude/
-│   ├── settings.json                  # Token caps + context statusline
+│   ├── settings.json                      # Token caps + context statusline
 │   ├── commands/
-│   │   ├── compact-now.md             # /compact-now — smart context compaction
-│   │   ├── figma-extract.md           # /figma-extract — token-efficient Figma data pull
-│   │   └── token-audit.md             # /token-audit — check session token health
+│   │   ├── compact-now.md                 # /compact-now — smart context compaction
+│   │   ├── figma-extract.md              # /figma-extract — token-efficient Figma data pull
+│   │   ├── token-audit.md                # /token-audit — check session token health
+│   │   ├── save-state.md                 # /save-state — persist context before compaction
+│   │   └── restore-state.md             # /restore-state — resume from saved state
+│   ├── hooks/
+│   │   ├── prevent-large-reads.json      # Warns before cat-ing files >100KB
+│   │   ├── context-budget-alert.json     # Alerts at 500K+ tokens
+│   │   └── read-before-edit.json         # Prevents editing unread files
 │   └── skills/
-│       ├── mcp-token-optimizer/       # Core MCP optimization skill
+│       ├── mcp-token-optimizer/          # Core MCP optimization skill
 │       │   ├── SKILL.md
 │       │   └── references/
-│       │       ├── figma-workflow.md   # Optimal Figma MCP call sequences
-│       │       └── token-budget-rules.md
-│       ├── figma-design-to-code/      # Figma → Code with minimal tokens
+│       │       ├── figma-workflow.md      # Optimal Figma MCP call sequences
+│       │       ├── token-budget-rules.md  # Token drain analysis & mitigation
+│       │       └── companion-tools.md    # Setup guide for RTK, CodeGraph, etc.
+│       ├── figma-design-to-code/         # Figma → Code with minimal tokens
 │       │   └── SKILL.md
-│       └── token-saver/               # Output compression (always active)
+│       ├── token-saver/                  # Output compression (always active)
+│       │   └── SKILL.md
+│       ├── output-filter/                # Command output compression
+│       │   └── SKILL.md
+│       ├── session-memory/               # Cross-session context preservation
+│       │   └── SKILL.md
+│       └── model-routing/                # Opus/Sonnet/Haiku cost optimization
 │           └── SKILL.md
-└── README.md
+├── README.md
+└── SOURCES.md                            # All GitHub repos & research links
 ```
 
 ## Installation
 
 ### Option A: Per-Project (recommended)
 
-Copy the `.claude/` folder and `CLAUDE.md` into your project root:
-
 ```bash
-# Clone or download this repo
-git clone <this-repo-url> /tmp/claude-mcp-optimizer
-
-# Copy into your project
-cp -r /tmp/claude-mcp-optimizer/.claude/ /path/to/your/project/.claude/
-cp /tmp/claude-mcp-optimizer/CLAUDE.md /path/to/your/project/CLAUDE.md
+git clone https://github.com/ieteerapat/ClaudeSkills1.0.git
+cp -r ClaudeSkills1.0/.claude/ /path/to/your/project/
+cp ClaudeSkills1.0/CLAUDE.md /path/to/your/project/
 ```
 
 ### Option B: Global (applies to all projects)
 
-Copy skills to your user-level Claude directory:
-
 ```bash
-# Copy skills globally
-cp -r .claude/skills/* ~/.claude/skills/
-
-# Merge settings (don't overwrite if you have existing settings)
-# Manually add the preferences from .claude/settings.json to ~/.claude/settings.json
+git clone https://github.com/ieteerapat/ClaudeSkills1.0.git
+cp -r ClaudeSkills1.0/.claude/skills/* ~/.claude/skills/
 ```
 
-### Option C: Cherry-pick what you need
+### Option C: Cherry-pick
 
-- **Just token savings?** Copy only `.claude/skills/token-saver/` and `CLAUDE.md`
-- **Just Figma optimization?** Copy `.claude/skills/figma-design-to-code/` and `.claude/skills/mcp-token-optimizer/`
-- **Just slash commands?** Copy `.claude/commands/`
+| Want | Copy |
+|---|---|
+| Just token savings | `.claude/skills/token-saver/` + `CLAUDE.md` |
+| Just Figma optimization | `.claude/skills/figma-design-to-code/` + `.claude/skills/mcp-token-optimizer/` |
+| Just hooks | `.claude/hooks/` |
+| Just slash commands | `.claude/commands/` |
+| Just model routing advice | `.claude/skills/model-routing/` |
+| Session memory | `.claude/skills/session-memory/` + `.claude/commands/save-state.md` + `.claude/commands/restore-state.md` |
 
-## Usage
+## Skills Overview
 
-### Automatic (Skills)
+| Skill | Purpose | Activation |
+|---|---|---|
+| `token-saver` | Enforces terse responses, 60-75% output reduction | Always active |
+| `mcp-token-optimizer` | Progressive disclosure, MCP caching strategy | When using MCP tools |
+| `figma-design-to-code` | Token-efficient Figma → code workflow | When working with Figma |
+| `output-filter` | Compresses test/build/git output | When running shell commands |
+| `session-memory` | Preserves context across compactions | Before compaction or new sessions |
+| `model-routing` | Routes tasks to cheapest capable model | When starting tasks |
 
-Skills activate automatically when Claude detects relevant context:
-- Working with MCP → `mcp-token-optimizer` activates
-- Figma design work → `figma-design-to-code` activates
-- All interactions → `token-saver` provides baseline compression
+## Hooks
 
-### Manual (Slash Commands)
+| Hook | Trigger | Action |
+|---|---|---|
+| `prevent-large-reads` | Before shell commands | Warns if cat-ing files >100KB |
+| `context-budget-alert` | After any tool use | Alerts when session exceeds 500K tokens |
+| `read-before-edit` | Before file writes | Ensures files are read before editing |
 
-```
-/figma-extract file_key=abc123 node_id=456:789 framework=react
-/token-audit
-/compact-now
-```
+## Slash Commands
+
+| Command | Purpose |
+|---|---|
+| `/figma-extract` | One-shot targeted Figma data extraction |
+| `/token-audit` | Check current session token health |
+| `/compact-now` | Smart manual compaction preserving key context |
+| `/save-state` | Persist session state before compaction |
+| `/restore-state` | Resume from saved state in new session |
 
 ## Expected Savings
 
-| Scenario | Without Optimizer | With Optimizer | Reduction |
+| Scenario | Without | With | Reduction |
 |---|---|---|---|
 | Figma component extraction | ~15,000 tokens | ~3,000 tokens | 80% |
-| General MCP workflow | ~57,000 tokens startup | ~5,000 tokens | 91% |
+| MCP server startup (5 servers) | ~55,000 tokens | ~5,000 tokens (skills) | 91% |
 | Code generation response | ~500 tokens | ~150 tokens | 70% |
-| Long session (before compaction) | 200K+ (auto-compact) | ~120K (manual compact) | 40% |
+| Test output (100 tests) | ~5,000 tokens | ~200 tokens | 96% |
+| Long session (before compaction) | 200K+ (auto-compact) | ~120K (manual) | 40% |
+| Cross-session re-discovery | ~50,000 tokens | ~2,000 tokens (cached) | 96% |
+
+## Companion Tools (Stack for Maximum Savings)
+
+These tools work alongside this skills package. See `references/companion-tools.md` for full setup guide.
+
+| Tool | What It Does | Impact | Install |
+|---|---|---|---|
+| [RTK](https://github.com/rtk-ai/rtk) | Compresses bash output before context | 60-90% on shell output | `cargo install rtk-lite-cc` |
+| [Context Mode](https://github.com/mksglu/context-mode) | Sandboxes MCP tool output | 98% on large outputs | `/plugin marketplace add mksglu/context-mode` |
+| [CodeGraph](https://github.com/colbymchenry/codegraph) | Knowledge graph for code exploration | 92% fewer tool calls | `npx @colbymchenry/codegraph` |
+| [Claude-Mem](https://github.com/thedotmack/claude-mem) | Persistent memory across sessions | Eliminates re-discovery | `npx claude-mem install` |
+| [Caveman](https://github.com/JuliusBrussee/caveman) | Extreme output compression | 75% output reduction | `curl -fsSL .../install.sh \| bash` |
+| [Claude Router](https://github.com/0xrdan/claude-router) | Auto model routing by complexity | 60-95% cost reduction | See repo |
+
+### Recommended Stacks
+
+**Budget-conscious**: This package + RTK + Caveman → 70-85% savings
+
+**Large codebase**: This package + CodeGraph + Claude-Mem + RTK → 80-95% savings
+
+**Figma-heavy**: This package + Context Mode + Claude-Mem → 85-95% savings
+
+**Maximum**: All of the above → 90-98% savings
 
 ## How It Works
 
-### The MCP Token Tax Problem
+### The Problem
+- MCP servers load ALL tool definitions at startup (5,000-80,000+ tokens)
+- Auto-compaction fires at 93% context, costs 100-200K tokens each time
+- Verbose responses waste 60-75% of output tokens on fluff
+- Command outputs (tests, builds, git) dump raw data into context
+- Each new session re-discovers the same codebase from scratch
 
-Every connected MCP server loads ALL tool definitions into context at startup. 5 servers with 60 tools = ~55,000 tokens burned before you do anything.
-
-### This Package Solves It By:
-
-1. **Progressive disclosure** — Skills load only when needed (~50 tokens idle vs 5,000+ for MCP tools)
-2. **Caching strategy** — Extract data once from MCP, save to files, reference files thereafter
-3. **Targeted fetching** — Never bulk-fetch; always use specific node IDs and filters
-4. **Output compression** — 60-75% reduction in Claude's response verbosity
-5. **Proactive compaction** — Compact at 60% context instead of waiting for 93% auto-compaction
-
-### Figma-Specific Optimizations
-
-- Cache design tokens locally after first extraction
-- Use node IDs instead of fetching entire files
-- Generate components incrementally (structure → tokens → layout)
-- Batch related component fetches
-
-## Complementary Tools
-
-These work well alongside this skills package:
-
-| Tool | What It Does | Install |
-|---|---|---|
-| [caveman](https://github.com/JuliusBrussee/caveman) | Extreme output compression (75% reduction) | `curl -fsSL https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.sh \| bash` |
-| [token-optimizer-mcp](https://github.com/ooples/token-optimizer-mcp) | MCP-level caching and compression | Add as MCP server |
-| [claude-token-efficient](https://github.com/drona23/claude-token-efficient) | Single CLAUDE.md for terse output | Drop-in file |
+### This Package Solves It By
+1. **Progressive disclosure** — Skills load on-demand (~50 tokens idle vs 5,000+ for MCP)
+2. **Caching** — Extract data once, save to files, reference thereafter
+3. **Targeted fetching** — Specific node IDs and filters, never bulk operations
+4. **Output compression** — 60-75% reduction in response verbosity
+5. **Proactive compaction** — Compact at 60% instead of waiting for 93%
+6. **Session memory** — Persist state to files, restore without re-fetching
+7. **Model routing** — Use cheapest model that can handle each task
+8. **Hooks** — Automated guards against common token waste patterns
 
 ## Customization
 
-### Adjust verbosity level
+- Edit `CLAUDE.md` to add your project's framework and conventions
+- Adjust thinking token cap in `.claude/settings.json`
+- Modify hook thresholds (file size, token budget) in `.claude/hooks/`
+- Add project-specific design tokens to the Figma skill references
+- Remove skills you don't need — they're independent
 
-Edit `.claude/skills/token-saver/SKILL.md` — the "Override" section defines when Claude should be verbose.
+## Contributing
 
-### Add project-specific tokens
-
-After first Figma extraction, your cached tokens file becomes the source of truth. Update it when designs change rather than re-fetching everything.
-
-### Disable specific skills
-
-Remove or rename the skill directory to disable it. Skills are independent — removing one doesn't affect others.
+Found a new tool or technique? Open a PR adding it to `SOURCES.md` and optionally create a new skill or reference file.
 
 ## Research Sources
 
-- [The Hidden Token Tax of MCP Servers](https://smithhorngroup.substack.com/p/the-hidden-token-tax-of-mcp-servers) — MCP vs Skills token comparison
-- [Claude Code Skills: 98% Token Savings Architecture](https://codewithseb.com/blog/claude-code-skills-reusable-ai-workflows-guide) — Progressive disclosure explained
-- [Figma MCP Skills Documentation](https://developers.figma.com/docs/figma-mcp-server/create-skills/) — Official Figma skill creation guide
-- [Reduce Claude Code Tokens: 10 Tested Tools](https://computingforgeeks.com/reduce-claude-code-token-usage-tools/) — Benchmarked comparison of optimization tools
-- [A Practical Guide to Cutting Token Usage by 50%+](https://aleksandar.xyz/blog/2026-04-13-a-practical-guide-to-cutting-claude-code-token-usage-by-50-plus/) — Four token drain categories and mitigations
+See [SOURCES.md](./SOURCES.md) for the complete list of 50+ GitHub repos, articles, and official documentation used to build this package.

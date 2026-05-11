@@ -1,0 +1,13 @@
+{
+  "name": "Read Before Edit",
+  "version": "1.0.0",
+  "description": "Warns when attempting to edit a file that hasn't been read in the current session. Prevents incorrect edits that lead to reverts and token waste.",
+  "when": {
+    "type": "preToolUse",
+    "toolTypes": ["write"]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Before editing this file, confirm you have read it in this session. If not, read the relevant section first to avoid incorrect edits that waste tokens on reverts."
+  }
+}

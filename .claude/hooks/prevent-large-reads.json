@@ -1,0 +1,13 @@
+{
+  "name": "Prevent Large File Reads",
+  "version": "1.0.0",
+  "description": "Warns before reading files larger than 100KB into context. Suggests using head/grep/tail instead of cat on large files.",
+  "when": {
+    "type": "preToolUse",
+    "toolTypes": ["shell"]
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "CMD=$(cat | jq -r '.tool_input.command // empty'); FILE=$(echo \"$CMD\" | grep -oE '(cat|less|more)\\s+([^ |>]+)' | awk '{print $NF}'); [ -z \"$FILE\" ] || [ ! -f \"$FILE\" ] && exit 0; SIZE=$(du -k \"$FILE\" 2>/dev/null | cut -f1); [ \"${SIZE:-0}\" -gt 100 ] && echo \"WARNING: $FILE is ${SIZE}KB. Use head -50, grep, or tail instead to avoid context bloat.\" >&2; exit 0"
+  }
+}
