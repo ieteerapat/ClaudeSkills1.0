@@ -1,0 +1,10 @@
+{
+  "preferences": {
+    "maxThinkingTokens": 10000,
+    "verbosity": "minimal"
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "echo \"ctx $(jq -r '.context_window.remaining_percentage // 100' < $CLAUDE_STATUS_INPUT)%\""
+  }
+}

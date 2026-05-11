@@ -1,0 +1,1 @@
+Compact the current conversation context. Summarize key decisions, active file paths, and current task state. Discard verbose tool outputs and intermediate reasoning. Keep: file paths modified, design tokens extracted, component structure decisions, and next steps.
