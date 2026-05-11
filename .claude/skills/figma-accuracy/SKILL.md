@@ -1,11 +1,11 @@
 ---
 name: "Figma MCP Accuracy"
-description: "Ensures pixel-perfect accuracy when reading and implementing Figma designs via MCP. Enforces the correct tool call sequence, handles large designs gracefully, validates output against screenshots, and prevents common fidelity failures. Use whenever implementing UI from Figma MCP data."
+description: "Ensures pixel-perfect accuracy when reading and implementing Figma designs via MCP. Enforces correct tool sequence, handles large designs, validates against screenshots, and uses design system rules for consistent output. Use whenever implementing UI from Figma MCP data."
 ---
 
 # Figma MCP Accuracy
 
-Maximize design-to-code fidelity when reading from Figma MCP. Current AI tools achieve 65-80% accuracy by default — this skill pushes it toward 95%+ through structured workflows and validation loops.
+Maximize design-to-code fidelity when reading from Figma MCP. Default AI accuracy is 65-80%. This skill pushes toward 95%+ through structured workflows, design system rules, and validation loops.
 
 ## When to use
 
@@ -13,25 +13,57 @@ Maximize design-to-code fidelity when reading from Figma MCP. Current AI tools a
 - Extracting design tokens or component specs from Figma
 - Validating implemented code against Figma source
 - Working with large/complex Figma files that exceed token limits
+- Setting up a project for consistent Figma-to-code output
 
-## The Accuracy Problem
+## Why Accuracy Fails (Root Causes)
 
-AI-assisted design-to-code typically fails on:
-- **Spacing**: 4px vs 8px gaps, padding inconsistencies
-- **Typography**: Wrong font weight, size, or line-height
-- **Colors**: Close-but-wrong hex values, missing opacity
-- **Layout**: Auto-layout direction misread, wrong constraints
-- **Assets**: Hallucinated icons, placeholder images instead of real ones
+1. **No project rules** — AI doesn't know your conventions, guesses class names and structure
+2. **Wrong tool order** — Fetching full context before understanding structure wastes tokens and truncates
+3. **No visual validation** — AI never compares output against the actual design
+4. **No Code Connect** — AI creates new components instead of reusing existing ones
+5. **Hardcoded values** — AI uses literal hex/px instead of design tokens
+6. **Large designs truncated** — `get_design_context` exceeds 25K token limit, data is lost
 
-Root cause: The AI doesn't have enough structured context, or processes too much at once and loses detail.
+## The Accuracy Stack (3 Layers)
+
+### Layer 1: Design System Rules (one-time setup)
+
+Run `create_design_system_rules` ONCE per project. This generates a rules file (CLAUDE.md / AGENTS.md) that tells the AI:
+- Where components live
+- What styling approach to use
+- Where design tokens are defined
+- How to name and structure components
+- What to never hardcode
+
+```
+create_design_system_rules(clientLanguages="typescript", clientFrameworks="react")
+```
+
+This single step eliminates the #1 cause of inaccuracy: the AI guessing your conventions.
+
+### Layer 2: Code Connect (component mapping)
+
+Set up Code Connect to map Figma components → your code components:
+
+```
+get_code_connect_map(fileKey=":fileKey", nodeId="X-Y")
+```
+
+When Code Connect is configured:
+- AI knows which existing component to use for each Figma instance
+- No duplicate components created
+- Props map correctly from Figma variants to code props
+- Import paths are correct
+
+### Layer 3: Structured Read Workflow (every implementation)
+
+Follow this exact sequence for every Figma implementation:
 
 ## Required Tool Call Sequence
 
-Follow this exact order. Do NOT skip steps.
-
 ### Step 1: Parse the Figma URL
 
-Extract from URL format: `https://figma.com/design/:fileKey/:fileName?node-id=X-Y`
+Extract from: `https://figma.com/design/:fileKey/:fileName?node-id=X-Y`
 - `fileKey` = segment after `/design/`
 - `nodeId` = value of `node-id` param (format: `X-Y`)
 
@@ -43,29 +75,29 @@ For desktop MCP: no fileKey needed, uses current selection.
 get_metadata(fileKey=":fileKey", nodeId="X-Y")
 ```
 
-Returns sparse XML with layer IDs, names, types, positions, sizes.
-- Use this to understand the component hierarchy BEFORE fetching full context
+Returns sparse XML: layer IDs, names, types, positions, sizes.
+- Understand hierarchy BEFORE fetching full context
 - Identify which child nodes need individual fetching
-- Plan your implementation order (top-down)
+- Plan implementation order (top-down)
 
-**Why metadata first**: `get_design_context` on large designs can return 351,000+ tokens and exceed limits. Metadata is lightweight and gives you the map.
+**Why first**: `get_design_context` can return 351,000+ tokens on large designs and exceed limits. Metadata is lightweight.
 
 ### Step 3: Get Design Context (targeted)
 
-For small/medium components (single frame, <20 layers):
+**Small/medium components** (<20 layers):
 ```
 get_design_context(fileKey=":fileKey", nodeId="X-Y")
 ```
 
-For large/complex designs (full pages, >20 layers):
+**Large/complex designs** (full pages, >20 layers):
 ```
-# Fetch each major section individually
+# Fetch each major section individually using IDs from metadata
 get_design_context(fileKey=":fileKey", nodeId=":headerNodeId")
 get_design_context(fileKey=":fileKey", nodeId=":contentNodeId")
 get_design_context(fileKey=":fileKey", nodeId=":footerNodeId")
 ```
 
-**Critical**: If response is truncated or exceeds token limit, STOP and break into smaller node fetches. Never proceed with partial data.
+**If response exceeds token limit**: STOP. Break into smaller node fetches. Never proceed with partial data.
 
 ### Step 4: Get Screenshot (visual truth)
 
@@ -73,7 +105,7 @@ get_design_context(fileKey=":fileKey", nodeId=":footerNodeId")
 get_screenshot(fileKey=":fileKey", nodeId="X-Y")
 ```
 
-This is your **source of truth** for validation. Keep it accessible throughout implementation.
+This is your **source of truth**. Keep accessible throughout implementation. Compare final output against this.
 
 ### Step 5: Get Variables/Tokens
 
@@ -81,149 +113,181 @@ This is your **source of truth** for validation. Keep it accessible throughout i
 get_variable_defs(fileKey=":fileKey", nodeId="X-Y")
 ```
 
-Returns colors, spacing, typography tokens used in the selection.
-- Map these to your project's design token system
-- Cache locally for reuse across components
+Returns colors, spacing, typography tokens. Map to your project's token system. Cache locally.
 
-### Step 6: Download Assets
+### Step 6: Check Code Connect
+
+```
+get_code_connect_map(fileKey=":fileKey", nodeId="X-Y")
+```
+
+If mappings exist: USE the mapped components. Don't recreate.
+If no mappings: check your component library manually before creating new.
+
+### Step 7: Download Assets
 
 If Figma MCP returns localhost URLs for images/icons/SVGs:
-- Use those URLs directly
-- Do NOT import icon packages
-- Do NOT create placeholders
+- **Use those URLs directly**
+- **DO NOT** import icon packages (no lucide, no heroicons, no font-awesome)
+- **DO NOT** create placeholders
 - Assets are served through Figma MCP's built-in endpoint
 
-### Step 7: Implement with Validation
+### Step 8: Implement with Project Conventions
 
-Generate code, then validate against the screenshot from Step 4.
+Translate Figma output (React + Tailwind default) into YOUR project's:
+- Framework (Vue, Svelte, Angular, etc.)
+- Styling approach (CSS Modules, styled-components, etc.)
+- Component patterns (naming, props, file structure)
+- Design tokens (your token file, not hardcoded values)
 
-## Accuracy Rules
+### Step 9: Validate Against Screenshot
 
-### Spacing & Layout
-- ALWAYS use exact pixel values from `get_design_context`, not approximations
-- Auto-layout direction (HORIZONTAL/VERTICAL) maps to flex-row/flex-col
-- `itemSpacing` = gap between children
-- `paddingTop/Right/Bottom/Left` = exact padding values
-- `primaryAxisSizingMode: AUTO` = content-hugging
-- `counterAxisSizingMode: FIXED` = explicit width/height
+Compare implementation against Step 4 screenshot:
 
-### Typography
-- Extract exact: fontFamily, fontSize, fontWeight, lineHeight, letterSpacing
-- `lineHeight` in Figma can be: AUTO, px value, or percentage — handle each
-- `letterSpacing` can be px or percentage
-- Font weight names vary: "SemiBold" vs "Semi Bold" vs "Semibold" — use exact string from Figma
-
-### Colors
-- Figma uses 0-1 range internally, MCP returns hex or rgba
-- Always include opacity when present (don't assume 100%)
-- Map to design tokens where possible, but use exact values if no token matches
-- Check for gradient fills — they need special handling
-
-### Components & Variants
-- Check if your project already has a matching component before creating new
-- If extending existing: add variant, don't duplicate
-- Preserve Figma's component property names in your props interface
-
-### Responsive Behavior
-- Figma shows ONE breakpoint — ask user about responsive requirements
-- `constraints` in Figma map to CSS positioning behavior
-- `layoutGrow: 1` = flex-grow: 1
-- `layoutAlign: STRETCH` = align-self: stretch
-
-## Validation Checklist
-
-Before marking implementation complete:
-
-- [ ] Layout matches screenshot (spacing, alignment, sizing)
-- [ ] Typography matches (font, size, weight, line-height, letter-spacing)
+- [ ] Layout matches (spacing, alignment, sizing)
+- [ ] Typography matches (font, size, weight, line-height)
 - [ ] Colors match exactly (including opacity)
-- [ ] Border radius values are correct
+- [ ] Border radius correct
 - [ ] Shadows/effects match
-- [ ] Assets render (no broken images, no placeholder icons)
-- [ ] Interactive states work (hover, active, disabled, focus)
-- [ ] Accessibility: semantic HTML, ARIA labels, contrast ratios
+- [ ] Assets render (no broken images, no wrong icons)
+- [ ] Interactive states work (hover, active, disabled)
+
+If using Playwright MCP: take a browser screenshot and compare programmatically.
+
+## Accuracy Boosters
+
+### Use Auto Layout in Figma (designer responsibility)
+
+Components built with Auto Layout produce MUCH better code because responsive intent is captured in the data. If designs use absolute positioning, accuracy drops significantly.
+
+### Name Layers Semantically (designer responsibility)
+
+- `CardContainer` → AI generates meaningful class/component names
+- `Group 45` → AI guesses, output is inconsistent
+
+### Use Framelink MCP for Better Layout Data
+
+The official Figma MCP sometimes lacks position data for non-AutoLayout elements. **Framelink** (GLips/Figma-Context-MCP) simplifies and translates responses for better layout accuracy:
+
+```json
+{
+  "mcpServers": {
+    "Framelink MCP for Figma": {
+      "command": "npx",
+      "args": ["-y", "figma-developer-mcp", "--figma-api-key=YOUR-KEY", "--stdio"]
+    }
+  }
+}
+```
+
+Or use the **Smart Position fork** (tianmuji/figma-context-mcp) which adds x/y/width/height for non-AutoLayout elements:
+
+```json
+{
+  "mcpServers": {
+    "figma-context": {
+      "command": "npx",
+      "args": ["figma-context-mcp", "--figma-api-key=YOUR-KEY", "--stdio"]
+    }
+  }
+}
+```
+
+### Visual Verification Loop (Playwright)
+
+For pixel-perfect results, add Playwright MCP to create a self-correction loop:
+
+1. Implement from Figma data
+2. Render in browser via Playwright
+3. Screenshot the rendered output
+4. Compare against Figma screenshot
+5. Fix discrepancies
+6. Repeat until match
+
+### Figma File Structure Tips (for designers)
+
+Tell your designers these improve AI accuracy:
+- Use Auto Layout everywhere (not absolute positioning)
+- Name layers semantically (not "Frame 1", "Group 2")
+- Use variables/tokens for colors and spacing (not raw hex)
+- Keep component variants organized in component sets
+- Publish components to team library
+- Set up Code Connect mappings
 
 ## Handling Common Failures
 
 ### "Response exceeds maximum allowed tokens (25000)"
 
-The design is too large for a single `get_design_context` call.
-
-**Fix**:
-1. Use `get_metadata` to get the node tree
-2. Identify top-level sections
-3. Fetch each section individually
-4. Implement section by section
-
-### "Spacing is wrong by 2-4px"
-
-The AI approximated instead of using exact values.
-
-**Fix**:
-- Always extract exact `itemSpacing`, `paddingTop/Right/Bottom/Left` from design context
-- Never round or approximate spacing values
-- Cross-reference with screenshot if values seem off
-
-### "Wrong font weight"
-
-Figma font style names don't always map cleanly to CSS weights.
-
-**Fix**:
-- "Thin" = 100, "Light" = 300, "Regular" = 400
-- "Medium" = 500, "SemiBold" = 600, "Bold" = 700
-- "ExtraBold" = 800, "Black" = 900
-- When in doubt, use the exact `fontWeight` number from design context
-
-### "Colors are slightly off"
-
-The AI used a close color instead of the exact token.
-
-**Fix**:
-- Always use hex/rgba values directly from `get_design_context`
-- If a design token exists with that value, reference the token
-- If no token matches, use the literal value (don't approximate to nearest token)
-
-### "Auto-layout not matching"
-
-**Fix**:
-- Check `layoutMode`: HORIZONTAL = row, VERTICAL = column
-- Check `primaryAxisAlignItems`: MIN = start, CENTER = center, MAX = end, SPACE_BETWEEN = space-between
-- Check `counterAxisAlignItems`: MIN = start, CENTER = center, MAX = end
-- Check `layoutWrap`: WRAP = flex-wrap
-
-### "Icons are wrong or missing"
-
-**Fix**:
-- Use ONLY assets from Figma MCP response
-- Never substitute with icon library icons
-- If SVG data is provided, use it inline or save to assets folder
-- If localhost URL is provided, download from that URL
-
-## Token-Efficient Accuracy
-
-Achieving accuracy WITHOUT burning excessive tokens:
-
-1. **Metadata first** (cheap) → understand structure
-2. **Targeted context** (moderate) → fetch only what you need
-3. **Screenshot once** (moderate) → visual reference for validation
-4. **Variables once** (cheap) → cache tokens locally
-5. **Implement incrementally** → one section at a time, validate each
-
-Total cost for a typical component: ~3,000-5,000 tokens
-vs. naive approach (full file fetch): ~15,000-50,000+ tokens
-
-## Project Rules Template
-
-Add to your project's CLAUDE.md for consistent Figma implementation:
-
-```markdown
-## Figma Implementation Rules
-- Framework: [React/Vue/Svelte/etc.]
-- Styling: [Tailwind/CSS Modules/Styled Components/etc.]
-- Design tokens location: [path to tokens file]
-- Component directory: [path to components]
-- Naming convention: [PascalCase/kebab-case]
-- Always use get_metadata before get_design_context on large designs
-- Always validate against get_screenshot before marking complete
-- Map Figma tokens to project tokens in [tokens file path]
+```bash
+# Fix: Set environment variable
+MAX_MCP_OUTPUT_TOKENS=100000
 ```
+
+Or: use `get_metadata` first, then fetch child nodes individually.
+
+### Spacing is wrong by 2-4px
+
+- Always use exact `itemSpacing`, `paddingTop/Right/Bottom/Left` from design context
+- Never round or approximate
+- Cross-reference with screenshot
+
+### Wrong font weight
+
+| Figma Style | CSS weight |
+|---|---|
+| Thin | 100 |
+| Light | 300 |
+| Regular | 400 |
+| Medium | 500 |
+| SemiBold | 600 |
+| Bold | 700 |
+| ExtraBold | 800 |
+| Black | 900 |
+
+### Colors slightly off
+
+- Use hex/rgba directly from `get_design_context`
+- If design token exists with that value, reference the token
+- If no token matches, use literal value (don't approximate)
+
+### Icons are wrong or missing
+
+- Use ONLY assets from Figma MCP response
+- Never substitute with icon library
+- If SVG data provided, use inline or save to assets
+- If localhost URL provided, download from that URL
+
+### Auto-layout not matching
+
+| Figma | CSS |
+|---|---|
+| `layoutMode: HORIZONTAL` | `flex-direction: row` |
+| `layoutMode: VERTICAL` | `flex-direction: column` |
+| `primaryAxisAlignItems: MIN` | `justify-content: flex-start` |
+| `primaryAxisAlignItems: CENTER` | `justify-content: center` |
+| `primaryAxisAlignItems: MAX` | `justify-content: flex-end` |
+| `primaryAxisAlignItems: SPACE_BETWEEN` | `justify-content: space-between` |
+| `counterAxisAlignItems: MIN` | `align-items: flex-start` |
+| `counterAxisAlignItems: CENTER` | `align-items: center` |
+| `layoutWrap: WRAP` | `flex-wrap: wrap` |
+| `layoutGrow: 1` | `flex-grow: 1` |
+| `layoutAlign: STRETCH` | `align-self: stretch` |
+
+## MCP Server Options Comparison
+
+| Server | Best For | Accuracy Boost |
+|---|---|---|
+| **Figma Official** (remote/desktop) | Full feature set, Code Connect, design system search | Highest (with Code Connect) |
+| **Framelink** (GLips/Figma-Context-MCP) | Simplified layout data, one-shot implementations | Better layout inference |
+| **Smart Position fork** (tianmuji) | Non-AutoLayout designs with absolute positioning | Position data for static layouts |
+| **Figma REST API** (direct curl) | Fallback when MCP fails, no rate limit concerns | Raw data, full control |
+
+## Quick Setup Checklist
+
+- [ ] Run `create_design_system_rules` for your project
+- [ ] Set up Code Connect for your component library
+- [ ] Set `MAX_MCP_OUTPUT_TOKENS=100000` in environment
+- [ ] Add Figma implementation rules to CLAUDE.md
+- [ ] Cache design tokens locally after first extraction
+- [ ] (Optional) Add Framelink MCP for better layout data
+- [ ] (Optional) Add Playwright MCP for visual verification loop

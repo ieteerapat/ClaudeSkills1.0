@@ -47,9 +47,24 @@ All repositories and resources referenced in building this skills package.
 | Resource | Description | Link |
 |---|---|---|
 | Figma MCP Skills Docs | Official guide to creating Figma MCP skills | https://developers.figma.com/docs/figma-mcp-server/create-skills/ |
+| Figma MCP Tools & Prompts | All official tools with usage docs | https://developers.figma.com/docs/figma-mcp-server/tools-and-prompts/ |
+| Figma Implement Design Skill | Official pixel-perfect workflow | https://developers.figma.com/docs/figma-mcp-server/skill-figma-implement-design/ |
+| Figma Create Design System Rules | Generate project-specific rules for accuracy | https://developers.figma.com/docs/figma-mcp-server/skill-figma-create-design-system-rules/ |
+| Figma Code Connect Setup | Map Figma components to code components | https://developers.figma.com/docs/code-connect/code-connect-ui-setup |
+| Figma Add Custom Rules | Project-level instructions for AI | https://developers.figma.com/docs/figma-mcp-server/add-custom-rules |
+| Figma MCP Known Issues | Token limit errors and fixes | https://developers.figma.com/docs/figma-mcp-server/mcp-clients-issues/ |
+| Figma MCP Server Guide (GitHub) | Official skills repo with SKILL.md files | https://github.com/figma/mcp-server-guide |
+| Framelink MCP (GLips) | Simplified layout data, 11.6K+ users | https://github.com/GLips/Figma-Context-MCP |
+| Smart Position Fork (tianmuji) | Adds x/y/width/height for non-AutoLayout | https://github.com/tianmuji/Figma-Context-MCP |
 | Figma MCP + Claude Code | Builder.io integration guide | https://www.builder.io/blog/claude-code-figma-mcp-server |
-| Figma Implementation Accuracy | Claude Code rules for consistent Figma output | https://devtools.shingoirie.com/blog/en/claude-code-rules-figma-implementation/ |
+| Figma Implementation Accuracy | Claude Code rules for consistent output | https://devtools.shingoirie.com/blog/en/claude-code-rules-figma-implementation/ |
+| Pixel-Perfect with Playwright | Visual verification loop (65-80% baseline) | https://vadim.blog/pixel-perfect-playwright-figma-mcp |
 | Figma Design-to-Code Workflow | End-to-end workflow guide | https://sergeichyrkov.com/blog/claude-code-figma-mcp-design-to-code-workflow |
+| Structure Figma Files for MCP | How designers can improve AI accuracy | https://blog.logrocket.com/ux-design/design-to-code-with-figma-mcp/ |
+| Figma MCP Accurate Front-End Code | Urban Insight real-project workflow | https://www.urbaninsight.com/article/figma-mcp-how-generate-design-accurate-front-end-code-ai |
+| monday.com Figma-to-Code | Production pipeline case study | https://engineering.monday.com/how-we-use-ai-to-turn-figma-designs-into-production-code/ |
+| Figma Code Connect (React) | Connecting React components to Figma | https://developers.figma.com/docs/code-connect/react/ |
+| Visual Pixel-Perfect Skill | Playwright implement→render→compare loop | https://playbooks.com/skills/nguyenthienthanh/aura-frog/visual-pixel-perfect |
 
 ## Articles & Analysis
 
