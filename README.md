@@ -26,6 +26,12 @@ claude-code-mcp-optimizer/
 │       │       ├── figma-workflow.md      # Optimal Figma MCP call sequences
 │       │       ├── token-budget-rules.md  # Token drain analysis & mitigation
 │       │       └── companion-tools.md    # Setup guide for RTK, CodeGraph, etc.
+│       ├── figma-accuracy/               # Pixel-perfect Figma implementation accuracy
+│       │   ├── SKILL.md
+│       │   └── references/
+│       │       ├── mcp-servers.md         # Figma MCP server comparison & setup
+│       │       ├── property-mapping.md    # Figma → CSS property reference
+│       │       └── tool-reference.md      # MCP tool API & token costs
 │       ├── figma-design-to-code/         # Figma → Code with minimal tokens
 │       │   └── SKILL.md
 │       ├── token-saver/                  # Output compression (always active)
@@ -62,7 +68,7 @@ cp -r ClaudeSkills1.0/.claude/skills/* ~/.claude/skills/
 | Want | Copy |
 |---|---|
 | Just token savings | `.claude/skills/token-saver/` + `CLAUDE.md` |
-| Just Figma optimization | `.claude/skills/figma-design-to-code/` + `.claude/skills/mcp-token-optimizer/` |
+| Just Figma optimization | `.claude/skills/figma-accuracy/` + `.claude/skills/figma-design-to-code/` + `.claude/skills/mcp-token-optimizer/` |
 | Just hooks | `.claude/hooks/` |
 | Just slash commands | `.claude/commands/` |
 | Just model routing advice | `.claude/skills/model-routing/` |
@@ -74,6 +80,7 @@ cp -r ClaudeSkills1.0/.claude/skills/* ~/.claude/skills/
 |---|---|---|
 | `token-saver` | Enforces terse responses, 60-75% output reduction | Always active |
 | `mcp-token-optimizer` | Progressive disclosure, MCP caching strategy | When using MCP tools |
+| `figma-accuracy` | Pixel-perfect Figma implementation (95%+ accuracy) | When implementing Figma designs |
 | `figma-design-to-code` | Token-efficient Figma → code workflow | When working with Figma |
 | `output-filter` | Compresses test/build/git output | When running shell commands |
 | `session-memory` | Preserves context across compactions | Before compaction or new sessions |
