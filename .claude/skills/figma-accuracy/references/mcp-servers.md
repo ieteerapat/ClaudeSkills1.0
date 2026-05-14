@@ -1,62 +1,121 @@
-# Figma MCP Server Options
+# Figma MCP Server Options (Updated May 2026)
 
-Multiple MCP servers exist for Figma. Each has different strengths for accuracy.
+## 1. Figma Official Remote MCP Server (RECOMMENDED)
 
-## 1. Figma Official MCP Server (Recommended)
+The official Figma MCP server is now the recommended approach. It connects directly to your Figma files via HTTP — no desktop app required.
 
-**Best for**: Full accuracy with Code Connect, design system search, and all official tools.
+**URL**: `https://mcp.figma.com/mcp`
 
-### Desktop Server (local)
-Works with Figma desktop app. Selection-based — select a node, AI reads it.
+### Setup for Claude Code (Preferred — Official Plugin)
 
-**Setup**: Built into Figma desktop app. Enable in Figma settings → MCP.
+```bash
+claude plugin install figma@claude-plugins-official
+```
 
-**Pros**:
-- No URL needed (uses current selection)
-- All tools available including `use_figma` for writing
-- Code Connect integration
-- `create_design_system_rules` tool
-- `search_design_system` for finding existing components
+This installs:
+- MCP server configuration
+- Agent Skills for common workflows (implement-design, create-design-system-rules, code-connect)
+- Asset handling rules
 
-**Cons**:
-- Requires Figma desktop app running
-- Rate limited (6-600 calls/day depending on plan)
-- `get_design_context` can exceed 25K token limit on large designs
+### Setup for Claude Code (Manual)
 
-### Remote Server (cloud)
-Works without desktop app. Requires Figma URL with node-id.
+```bash
+# Project-level:
+claude mcp add --transport http figma https://mcp.figma.com/mcp
 
-**Setup**:
+# Global (all projects):
+claude mcp add --scope user --transport http figma https://mcp.figma.com/mcp
+```
+
+### Setup for VS Code
+
 ```json
 {
-  "mcpServers": {
+  "servers": {
     "figma": {
-      "command": "npx",
-      "args": ["-y", "@anthropic-ai/figma-mcp-server"]
+      "type": "http",
+      "url": "https://mcp.figma.com/mcp"
     }
   }
 }
 ```
 
-**Pros**:
-- No desktop app needed
-- `generate_figma_design` (code-to-canvas)
-- `use_figma` for writing to files
-- `search_design_system` across all libraries
-- `create_new_file`
+### Setup for Cursor
 
-**Cons**:
-- Requires URL with node-id (no selection-based)
-- Same rate limits
-- Some tools are beta/paid features
+```json
+{
+  "mcpServers": {
+    "figma": {
+      "url": "https://mcp.figma.com/mcp"
+    }
+  }
+}
+```
+
+### Features
+- **Write to canvas**: Create/modify native Figma content (frames, components, variables, auto layout)
+- **Generate designs from live UI**: Capture web app UI → Figma Design file
+- **Generate code from frames**: Select frame → get code
+- **Extract design context**: Variables, components, layout data
+- **Code Connect**: Map Figma components to code components
+- **Generate diagrams**: Create FigJam diagrams from Mermaid/natural language
+- **Search design system**: Find components/variables across all libraries
+- **Design system rules**: Generate project-specific CLAUDE.md rules
+
+### All Official Tools (May 2026)
+
+| Tool | Purpose | Rate Limited |
+|---|---|---|
+| `get_design_context` | Full design data for a node | Yes |
+| `get_metadata` | Sparse XML structure (IDs, names, types, positions) | Yes |
+| `get_variable_defs` | Variables and styles in selection | Yes |
+| `get_screenshot` | Screenshot of selection | Yes |
+| `get_code_connect_map` | Figma node → code component mapping | Yes |
+| `add_code_connect_map` | Add node-to-code mapping | Yes |
+| `get_code_connect_suggestions` | AI suggestions for Code Connect | Yes |
+| `send_code_connect_mappings` | Confirm Code Connect mappings | Yes |
+| `create_design_system_rules` | Generate rules file for your project | Yes |
+| `search_design_system` | Search libraries for components/variables | Yes (remote only) |
+| `use_figma` | Execute Plugin API JavaScript in Figma | No (remote only) |
+| `generate_figma_design` | Generate design layers from live UI | No (remote only) |
+| `generate_diagram` | Create FigJam diagram from Mermaid | No (remote only) |
+| `create_new_file` | Create new Figma/FigJam file | No (remote only) |
+| `whoami` | Get authenticated user info | No (remote only) |
+| `get_figjam` | Convert FigJam to XML | Yes |
+
+### Rate Limits
+
+| Plan | Limit |
+|---|---|
+| Starter / View / Collab seats | 6 calls/month |
+| Professional (Dev/Full seat) | Per-minute (Tier 1 REST API limits) |
+| Organization (Dev/Full seat) | Per-minute (Tier 1 REST API limits) |
+| Enterprise (Dev/Full seat) | Per-minute (Tier 1 REST API limits) |
+
+**Important**: `use_figma`, `generate_figma_design`, `generate_diagram`, and `create_new_file` are EXEMPT from rate limits.
 
 ---
 
-## 2. Framelink MCP (GLips/Figma-Context-MCP)
+## 2. Figma Desktop MCP Server (Local)
 
-**Best for**: Simplified, layout-focused data that produces better one-shot implementations.
+Works with Figma desktop app. Selection-based — select a node in Figma, AI reads it automatically.
 
-**What it does differently**: Before returning Figma API data, it simplifies and translates the response so only the most relevant layout and styling information is provided. Less noise = more accurate AI output.
+**Setup**: Built into Figma desktop app. Enable in Figma settings.
+
+**Key difference from remote**: 
+- No URL needed (uses current selection)
+- No `fileKey` parameter needed in tool calls
+- Some tools not available (no `use_figma`, no `search_design_system`)
+
+**Best for**: Quick iteration when you have Figma desktop open.
+
+---
+
+## 3. Framelink MCP (GLips/Figma-Context-MCP)
+
+**Best for**: Simplified layout data that produces better one-shot implementations with less token waste.
+
+**What it does differently**: Simplifies and translates Figma API responses so only the most relevant layout and styling information reaches the AI. Less noise = more accurate interpretation.
 
 **Setup**:
 ```json
@@ -83,26 +142,25 @@ Works without desktop app. Requires Figma URL with node-id.
 ```
 
 **Pros**:
-- Simplified output = less token waste, more accurate AI interpretation
-- Trusted by 11,600+ developers
-- Works with any MCP client (Cursor, Claude Code, VS Code, etc.)
-- Good for one-shot implementations
+- Simplified output = less tokens, more accurate AI interpretation
+- 11,600+ developers using it
+- Works with any MCP client
 
 **Cons**:
-- No Code Connect integration
+- No Code Connect
 - No `use_figma` (read-only)
 - No `search_design_system`
-- Uses Figma REST API (your personal access token)
+- Requires personal access token (not OAuth)
 
 **Repo**: https://github.com/GLips/Figma-Context-MCP
 
 ---
 
-## 3. Smart Position Fork (tianmuji/figma-context-mcp)
+## 4. Smart Position Fork (tianmuji/figma-context-mcp)
 
-**Best for**: Designs that use absolute positioning instead of Auto Layout.
+**Best for**: Designs using absolute positioning instead of Auto Layout.
 
-**What it does differently**: Adds x, y, width, height data for non-AutoLayout elements. This helps AI infer logical layout relationships from absolute positioning.
+**What it adds**: x, y, width, height for non-AutoLayout elements. Helps AI infer layout from absolute positioning.
 
 **Setup**:
 ```json
@@ -116,78 +174,27 @@ Works without desktop app. Requires Figma URL with node-id.
 }
 ```
 
-**Pros**:
-- Position data for non-AutoLayout elements
-- Better layout inference from absolute positioning
-- Fully backward compatible with Framelink
-- Helps with legacy Figma files that don't use Auto Layout
-
-**Cons**:
-- Same limitations as Framelink (no Code Connect, read-only)
-- Fork, may lag behind upstream updates
-
 **Repo**: https://github.com/tianmuji/Figma-Context-MCP
 
 ---
 
-## 4. Direct Figma REST API (fallback)
+## 5. Figma Console MCP (southleft)
 
-**Best for**: When MCP servers fail, rate limits hit, or you need full control.
+**Best for**: Design system as an API — extraction, creation, and debugging.
 
-**How to use**:
-```bash
-curl -H "X-Figma-Token: YOUR_TOKEN" \
-  "https://api.figma.com/v1/files/FILE_KEY/nodes?ids=NODE_ID"
-```
-
-**Pros**:
-- No MCP overhead
-- No rate limit concerns (standard API limits)
-- Full control over what data you fetch
-- Works when MCP servers won't connect
-
-**Cons**:
-- Raw JSON (not simplified for AI)
-- No progressive disclosure
-- Must parse response manually
-- More tokens consumed (verbose output)
+**Repo**: https://github.com/southleft/figma-console-mcp
 
 ---
 
-## Recommendation by Use Case
+## Recommendation (May 2026)
 
-| Scenario | Use This |
-|---|---|
-| New project, full setup | Figma Official (desktop or remote) |
-| Quick one-shot implementation | Framelink |
-| Legacy designs (no Auto Layout) | Smart Position fork |
-| MCP connection issues | Direct REST API |
-| Maximum accuracy | Official + Code Connect + design system rules |
-| Token-efficient reading | Framelink (simplified output) |
-| Writing back to Figma | Official remote (`use_figma`) |
-
-## Using Multiple Servers Together
-
-You can configure multiple Figma MCP servers simultaneously:
-
-```json
-{
-  "mcpServers": {
-    "figma-official": {
-      "command": "npx",
-      "args": ["-y", "@anthropic-ai/figma-mcp-server"]
-    },
-    "figma-framelink": {
-      "command": "npx",
-      "args": ["-y", "figma-developer-mcp", "--figma-api-key=YOUR-KEY", "--stdio"]
-    }
-  }
-}
+**For most users**: Install the official Figma plugin for Claude Code:
+```bash
+claude plugin install figma@claude-plugins-official
 ```
 
-**Strategy**:
-- Use Official for Code Connect lookups and design system search
-- Use Framelink for actual design context (cleaner, more accurate output)
-- This gives you the best of both worlds
+This gives you everything: MCP server, skills, Code Connect, design system rules, asset handling — all in one command.
 
-**Warning**: Each connected server adds to your token overhead. Only connect what you're actively using.
+**If you need better layout accuracy on non-AutoLayout designs**: Add Framelink or Smart Position fork alongside the official server.
+
+**If you're on Starter plan (6 calls/month)**: Use Framelink with a personal access token instead — no rate limit concerns beyond standard API limits.
