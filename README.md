@@ -100,6 +100,28 @@ export MAX_MCP_OUTPUT_TOKENS=100000
 | [Claude-Mem](https://github.com/thedotmack/claude-mem) | Persistent memory across sessions | `npx claude-mem install` |
 | [Caveman](https://github.com/JuliusBrussee/caveman) | Extreme output compression 75% | `curl -fsSL .../install.sh \| bash` |
 
+## Validated External Skills (install separately)
+
+These skills pass the agentskills.io test ("would the agent get this wrong without it?") and complement this package:
+
+| Skill | Source | Install | Why It Helps |
+|---|---|---|---|
+| Figma Official Plugin | Anthropic marketplace | `claude plugin install figma@claude-plugins-official` | Includes figma-implement-design, figma-use, figma-code-connect, figma-create-design-system-rules |
+| skill-creator | anthropics/skills (67K ⭐) | `/plugin marketplace add anthropics/skills` | Create and evaluate your own skills with structured evals |
+| Figma MCP Server Guide | figma/mcp-server-guide | `npx skills add https://github.com/figma/mcp-server-guide --skill figma-implement-design` | Official pixel-perfect implementation workflow |
+
+## Skills That FAILED Validation (don't install)
+
+Evaluated against agentskills.io criteria — these don't add value over CLAUDE.md rules:
+
+| Skill | Why It Fails |
+|---|---|
+| Most "terse output" skills | Agent follows these from CLAUDE.md — not procedural |
+| Most "code review" skills | Declarative checklists — agent already knows good practices |
+| Most "commit message" skills | Simple formatting — one line in CLAUDE.md is enough |
+| Most "SOLID principles" skills | Agent already knows SOLID — this is general knowledge |
+| Generic "best practices" skills | Vague declarations, not procedures with domain expertise |
+
 ## Research Sources
 
 See [SOURCES.md](./SOURCES.md) for 50+ GitHub repos, articles, and official documentation.

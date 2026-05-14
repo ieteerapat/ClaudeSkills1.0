@@ -99,4 +99,16 @@ All repositories and resources referenced in building this skills package.
 | Claude: Complete Guide to Building Skills | https://claude.com/blog/complete-guide-to-building-skills-for-claude |
 | CData: Build Skills from MCP Queries | https://www.cdata.com/blog/mcp-skills-part-2-building-skills |
 | Agent Skills Specification (open standard) | https://agentskills.io |
+| Agent Skills: Evaluating Quality | https://agentskills.io/skill-creation/evaluating-skills.md |
+| Agent Skills: Best Practices | https://agentskills.io/skill-creation/best-practices.md |
 | MCP Directory: Best Practices | https://mcp.directory/blog/claude-code-best-practices |
+
+## Validated Skill Repositories
+
+| Repo | Stars | What It Contains |
+|---|---|---|
+| anthropics/skills | 67K ⭐ | Official Anthropic skills (skill-creator, claude-api, document skills) |
+| figma/mcp-server-guide | — | Official Figma skills (implement-design, use, code-connect, generate-design) |
+| VoltAgent/awesome-agent-skills | — | 700+ curated skills directory |
+| travisvn/awesome-claude-skills | — | Curated list with categories |
+| levnikolaevich/claude-code-skills | — | Production workflow skills (research → planning → implementation → review) |
