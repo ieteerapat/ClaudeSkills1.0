@@ -1,6 +1,6 @@
 ---
-name: "Figma Design-to-Code (Token Efficient)"
-description: "Converts Figma designs to production code using minimal token budget. Use when implementing UI from Figma designs, extracting design systems, or generating components from Figma MCP data. For pixel-perfect accuracy details, also load figma-accuracy skill."
+name: figma-design-to-code
+description: Converts Figma designs to production code using minimal token budget. Use when implementing UI from Figma designs, extracting design systems, or generating components from Figma MCP data. For pixel-perfect accuracy details, also load figma-accuracy skill.
 ---
 
 # Figma Design-to-Code (Token Efficient)

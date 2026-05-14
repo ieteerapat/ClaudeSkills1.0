@@ -1,6 +1,6 @@
 ---
-name: "MCP Token Optimizer"
-description: "Reduces token drain when working with MCP servers (especially Figma MCP). Enforces progressive disclosure, caches design data, and keeps responses terse. Use this skill whenever working with MCP tools, Figma designs, or when token usage is a concern."
+name: mcp-token-optimizer
+description: Reduces token drain when working with MCP servers (especially Figma MCP). Enforces progressive disclosure, caches design data, and keeps responses terse. Use this skill whenever working with MCP tools, Figma designs, or when token usage is a concern.
 ---
 
 # MCP Token Optimizer

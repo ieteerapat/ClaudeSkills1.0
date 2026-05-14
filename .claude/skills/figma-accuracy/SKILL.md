@@ -1,6 +1,6 @@
 ---
-name: "Figma MCP Accuracy"
-description: "Ensures pixel-perfect accuracy when reading and implementing Figma designs via MCP. Enforces correct tool sequence, handles large designs, validates against screenshots, and uses design system rules for consistent output. Use whenever implementing UI from Figma MCP data."
+name: figma-accuracy
+description: Ensures pixel-perfect accuracy when reading and implementing Figma designs via MCP. Enforces correct tool sequence, handles large designs, validates against screenshots, and uses design system rules for consistent output. Use whenever implementing UI from Figma MCP data.
 ---
 
 # Figma MCP Accuracy

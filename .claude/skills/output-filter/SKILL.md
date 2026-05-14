@@ -1,6 +1,6 @@
 ---
-name: "Output Filter"
-description: "Filters and compresses command outputs before they consume context. Prevents large test results, build logs, and git diffs from bloating the context window. Use when running shell commands that produce verbose output."
+name: output-filter
+description: Filters and compresses command outputs before they consume context. Prevents large test results, build logs, and git diffs from bloating the context window. Use when running shell commands that produce verbose output.
 ---
 
 # Output Filter

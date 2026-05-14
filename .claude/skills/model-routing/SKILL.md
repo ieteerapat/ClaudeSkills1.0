@@ -1,6 +1,6 @@
 ---
-name: "Model Routing Advisor"
-description: "Advises on optimal model selection (Opus/Sonnet/Haiku) based on task complexity. Helps reduce costs by routing simple tasks to cheaper models. Use when starting a new task or when the user asks about model selection."
+name: model-routing
+description: Advises on optimal model selection (Opus/Sonnet/Haiku) based on task complexity. Helps reduce costs by routing simple tasks to cheaper models. Use when starting a new task or when the user asks about model selection.
 ---
 
 # Model Routing Advisor

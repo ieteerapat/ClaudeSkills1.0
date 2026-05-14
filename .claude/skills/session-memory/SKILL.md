@@ -1,6 +1,6 @@
 ---
-name: "Session Memory Manager"
-description: "Preserves critical context across compactions and sessions. Saves work state to files before compaction hits, restores context in new sessions. Use when working on long tasks that span multiple sessions or when context is getting full."
+name: session-memory
+description: Preserves critical context across compactions and sessions. Saves work state to files before compaction hits, restores context in new sessions. Use when working on long tasks that span multiple sessions or when context is getting full.
 ---
 
 # Session Memory Manager

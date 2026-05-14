@@ -1,6 +1,6 @@
 ---
-name: "Token Saver"
-description: "Enforces terse, token-efficient responses across all interactions. Reduces output verbosity by 60-75% without losing technical accuracy. Always active as a baseline optimization."
+name: token-saver
+description: Enforces terse, token-efficient responses across all interactions. Reduces output verbosity by 60-75% without losing technical accuracy. Always active as a baseline optimization.
 ---
 
 # Token Saver
