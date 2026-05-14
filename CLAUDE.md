@@ -7,17 +7,17 @@
 - One solution unless asked for alternatives
 - Show diffs over full files
 - Reference paths over pasting content
-- Compress command outputs: show summary, not raw dump
 - Test results → pass/fail count + failing test names only
 - Build logs → errors and warnings only
+- Never paste raw command output >50 lines — summarize first
 
 ## MCP Usage
 - Disable MCP servers not needed for current task
 - Cache MCP outputs to local files for reuse
 - Target specific nodes/resources — never bulk-fetch
-- Prefer skills with scripts over MCP for repeated operations
 - Check .claude/memory/ for cached data before making MCP calls
-- One MCP call that returns targeted data > multiple exploratory calls
+- One targeted MCP call > multiple exploratory calls
+- If MCP response exceeds token limit, break into smaller requests
 
 ## Token Budget
 - Cap thinking tokens at 10,000 for routine tasks
@@ -29,10 +29,9 @@
 - Never cat files >100KB — use head, tail, or grep
 
 ## Model Routing
-- Default to Sonnet for implementation (1/5 cost of Opus)
+- Default to Sonnet for implementation
 - Use /fast (Haiku) for: renames, formatting, git ops, boilerplate
 - Escalate to Opus only for: architecture, complex debugging, multi-file planning
-- If Sonnet fails twice on a task, escalate to Opus
 
 ## Code Generation
 - Match existing project conventions
