@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp \"C:\\\\Users\\\\Outsource2\\\\Downloads\\\\claudeskills\\\\claude-code-mcp-optimizer\\\\.claude\\\\skills\\\\figma-accuracy\\\\SKILL.md\" \"C:\\\\Users\\\\Outsource2\\\\.claude\\\\skills\\\\figma-accuracy\\\\SKILL.md\")",
+      "Bash(cp \"C:\\\\Users\\\\Outsource2\\\\Downloads\\\\claudeskills\\\\claude-code-mcp-optimizer\\\\.claude\\\\skills\\\\figma-accuracy\\\\references\\\\property-mapping.md\" \"C:\\\\Users\\\\Outsource2\\\\.claude\\\\skills\\\\figma-accuracy\\\\references\\\\property-mapping.md\")",
+      "Bash(cp \"C:\\\\Users\\\\Outsource2\\\\Downloads\\\\claudeskills\\\\claude-code-mcp-optimizer\\\\.claude\\\\skills\\\\figma-accuracy\\\\references\\\\tool-reference.md\" \"C:\\\\Users\\\\Outsource2\\\\.claude\\\\skills\\\\figma-accuracy\\\\references\\\\tool-reference.md\")",
+      "Bash(cp \"C:\\\\Users\\\\Outsource2\\\\Downloads\\\\claudeskills\\\\claude-code-mcp-optimizer\\\\.claude\\\\skills\\\\figma-accuracy\\\\references\\\\mcp-servers.md\" \"C:\\\\Users\\\\Outsource2\\\\.claude\\\\skills\\\\figma-accuracy\\\\references\\\\mcp-servers.md\")"
+    ]
+  }
+}

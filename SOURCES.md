@@ -57,6 +57,9 @@ All repositories and resources referenced in building this skills package.
 | Framelink MCP (GLips) | Simplified layout data, 11.6K+ users | https://github.com/GLips/Figma-Context-MCP |
 | Smart Position Fork (tianmuji) | Adds x/y/width/height for non-AutoLayout | https://github.com/tianmuji/Figma-Context-MCP |
 | Figma MCP + Claude Code | Builder.io integration guide | https://www.builder.io/blog/claude-code-figma-mcp-server |
+| Figma Code to Canvas | Bidirectional: live UI → Figma → back to code | https://developers.figma.com/docs/figma-mcp-server/code-to-canvas/ |
+| Figma Claude Code to Figma | Official blog: turning code into editable designs | https://www.figma.com/blog/introducing-claude-code-to-figma/ |
+| Figma Canvas Open to Agents | Agents read/write layers, tokens, push changes | https://www.figma.com/blog/the-future-of-design-is-code-and-canvas/ |
 | Figma Implementation Accuracy | Claude Code rules for consistent output | https://devtools.shingoirie.com/blog/en/claude-code-rules-figma-implementation/ |
 | Pixel-Perfect with Playwright | Visual verification loop (65-80% baseline) | https://vadim.blog/pixel-perfect-playwright-figma-mcp |
 | Figma Design-to-Code Workflow | End-to-end workflow guide | https://sergeichyrkov.com/blog/claude-code-figma-mcp-design-to-code-workflow |

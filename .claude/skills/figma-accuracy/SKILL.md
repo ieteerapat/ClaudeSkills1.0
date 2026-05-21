@@ -14,6 +14,7 @@ Maximize design-to-code fidelity when reading from Figma MCP. Default AI accurac
 - Validating implemented code against Figma source
 - Working with large/complex Figma files that exceed token limits
 - Setting up a project for consistent Figma-to-code output
+- Sending live UI back to Figma for design review (Code to Canvas)
 
 ## Why Accuracy Fails (Root Causes)
 
@@ -307,6 +308,28 @@ Or: use `get_metadata` first, then fetch child nodes individually.
 | **Direct REST API** | `curl -H "X-Figma-Token: KEY" https://api.figma.com/v1/...` | Fallback when MCP fails |
 
 See `references/mcp-servers.md` for full setup configs for each.
+
+## Code to Canvas (Bidirectional Workflow)
+
+Send your live UI back to Figma for design review. This closes the loop: code → canvas → review → back to code.
+
+### How it works
+
+1. Prompt: "Start a local server for my app and capture the UI in a new Figma file"
+2. Agent starts server, injects capture script, opens browser
+3. Use the toolbar to capture: **Entire screen** or **Select element**
+4. Click **Open file** when done — captured frames become editable Figma layers
+
+### Supported clients (June 2026)
+
+Augment, Claude Code, Codex, Cursor, Factory, Firebender, VS Code, Warp
+
+### Tips for accuracy
+
+- Capture specific states (hover, loading, error) separately
+- Capture to an existing file to keep iterations together: "Capture the login page to [Figma URL]"
+- After capture, prompt with the Figma frame link to implement changes back to code
+- For live web apps (not localhost), use Playwright to inject the capture script
 
 ## Quick Setup Checklist
 

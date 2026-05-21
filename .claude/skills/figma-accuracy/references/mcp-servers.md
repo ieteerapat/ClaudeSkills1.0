@@ -54,7 +54,7 @@ claude mcp add --scope user --transport http figma https://mcp.figma.com/mcp
 
 ### Features
 - **Write to canvas**: Create/modify native Figma content (frames, components, variables, auto layout)
-- **Generate designs from live UI**: Capture web app UI → Figma Design file
+- **Code to Canvas**: Capture live UI from browser → editable Figma layers (supported: Augment, Claude Code, Codex, Cursor, Factory, Firebender, VS Code, Warp)
 - **Generate code from frames**: Select frame → get code
 - **Extract design context**: Variables, components, layout data
 - **Code Connect**: Map Figma components to code components
