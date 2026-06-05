@@ -1,6 +1,10 @@
 ---
 name: figma-accuracy
 description: Ensures pixel-perfect accuracy when reading and implementing Figma designs via MCP. Enforces correct tool sequence, handles large designs, validates against screenshots, and uses design system rules for consistent output. Use whenever implementing UI from Figma MCP data.
+metadata:
+  version: "1.2.0"
+  last-updated: "2026-06-05"
+  author: ieteerapat
 ---
 
 # Figma MCP Accuracy
@@ -297,7 +301,7 @@ Or: use `get_metadata` first, then fetch child nodes individually.
 | `layoutGrow: 1` | `flex-grow: 1` |
 | `layoutAlign: STRETCH` | `align-self: stretch` |
 
-## MCP Server Options (May 2026)
+## MCP Server Options (June 2026)
 
 | Server | Setup | Best For |
 |---|---|---|

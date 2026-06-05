@@ -43,10 +43,12 @@ claude-code-mcp-optimizer/
 
 ## Skills (2 — validated against agentskills.io)
 
-| Skill | Why It Passes | What It Does |
-|---|---|---|
-| `figma-accuracy` | Agent gets Figma implementation wrong 65-80% of the time without structured workflow | Enforces correct tool sequence, handles large designs, validates against screenshots, uses Code Connect |
-| `session-memory` | Agent has no built-in way to persist state across compactions | Saves/restores work state to files so you never re-discover the same codebase |
+| Skill | Version | Why It Passes | What It Does |
+|---|---|---|---|
+| `figma-accuracy` | 1.2.0 | Agent gets Figma implementation wrong 65-80% of the time without structured workflow | Enforces correct tool sequence, handles large designs, validates against screenshots, uses Code Connect, Code to Canvas |
+| `session-memory` | 1.0.0 | Agent has no built-in way to persist state across compactions | Saves/restores work state to files so you never re-discover the same codebase |
+
+See [CHANGELOG.md](./CHANGELOG.md) for version history.
 
 ### What Was Removed (and why)
 

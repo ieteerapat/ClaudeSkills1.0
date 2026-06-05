@@ -1,6 +1,10 @@
 ---
 name: session-memory
 description: Preserves critical context across compactions and sessions. Saves work state to files before compaction hits, restores context in new sessions. Use when working on long tasks that span multiple sessions or when context is getting full.
+metadata:
+  version: "1.0.0"
+  last-updated: "2026-06-05"
+  author: ieteerapat
 ---
 
 # Session Memory Manager
