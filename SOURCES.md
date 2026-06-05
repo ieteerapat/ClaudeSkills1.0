@@ -112,6 +112,17 @@ All repositories and resources referenced in building this skills package.
 |---|---|---|
 | anthropics/skills | 67K ⭐ | Official Anthropic skills (skill-creator, claude-api, document skills) |
 | figma/mcp-server-guide | — | Official Figma skills (implement-design, use, code-connect, generate-design) |
+| heygen-com/hyperframes | 24.4K ⭐ | HTML → MP4 video framework with official agent skills (`npx skills add heygen-com/hyperframes`) |
 | VoltAgent/awesome-agent-skills | — | 700+ curated skills directory |
 | travisvn/awesome-claude-skills | — | Curated list with categories |
 | levnikolaevich/claude-code-skills | — | Production workflow skills (research → planning → implementation → review) |
+
+## HyperFrames (HTML → Video)
+
+| Resource | Description | Link |
+|---|---|---|
+| HyperFrames GitHub | HeyGen's open-source HTML-to-video framework (Apache 2.0) | https://github.com/heygen-com/hyperframes |
+| HyperFrames Quickstart | Zero to rendered MP4 in 2 minutes | https://hyperframes.heygen.com/quickstart |
+| HyperFrames Docs | Full documentation | https://hyperframes.heygen.com/introduction |
+| HyperFrames Playground | Community playground (preview, iterate, render) | https://www.hyperframes.dev |
+| HyperFrames Catalog | Reusable blocks (transitions, overlays, charts, captions) | https://hyperframes.heygen.com/catalog/blocks/data-chart |

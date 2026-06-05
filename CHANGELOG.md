@@ -9,6 +9,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com). Skills follow se
 |---|---|---|
 | figma-accuracy | 1.2.0 | 2026-06-05 |
 | session-memory | 1.0.0 | 2026-06-05 |
+| hyperframes-video | 1.0.0 | 2026-06-05 |
+
+---
+
+## hyperframes-video
+
+### 1.0.0 — 2026-06-05
+- Initial release. Quickstart skill for HeyGen's HyperFrames (HTML → MP4 video framework)
+- Captures core composition rules agents get wrong: `class="clip"`, root data attributes, paused GSAP timelines registered on `window.__timelines`
+- CLI dev loop (init → preview → render), project structure, media elements, adapter runtimes
+- Points to official upstream skills (`npx skills add heygen-com/hyperframes`) for deep runtime work
+- Based on upstream v0.6.73
 
 ---
 

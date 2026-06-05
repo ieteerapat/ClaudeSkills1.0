@@ -41,12 +41,13 @@ claude-code-mcp-optimizer/
 └── SOURCES.md                            # All research links
 ```
 
-## Skills (2 — validated against agentskills.io)
+## Skills (3 — validated against agentskills.io)
 
 | Skill | Version | Why It Passes | What It Does |
 |---|---|---|---|
 | `figma-accuracy` | 1.2.0 | Agent gets Figma implementation wrong 65-80% of the time without structured workflow | Enforces correct tool sequence, handles large designs, validates against screenshots, uses Code Connect, Code to Canvas |
 | `session-memory` | 1.0.0 | Agent has no built-in way to persist state across compactions | Saves/restores work state to files so you never re-discover the same codebase |
+| `hyperframes-video` | 1.0.0 | Agent gets HyperFrames composition rules wrong (clip markers, paused timelines, registration) without them | Create deterministic MP4 videos from HTML/CSS + GSAP. Captures the gotchas generic web docs miss, points to official upstream skills for deep work |
 
 See [CHANGELOG.md](./CHANGELOG.md) for version history.
 
