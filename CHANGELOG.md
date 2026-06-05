@@ -9,17 +9,25 @@ Format based on [Keep a Changelog](https://keepachangelog.com). Skills follow se
 |---|---|---|
 | figma-accuracy | 1.2.0 | 2026-06-05 |
 | session-memory | 1.0.0 | 2026-06-05 |
-| hyperframes-video | 1.0.0 | 2026-06-05 |
+| hyperframes-video | 2.0.0 | 2026-06-05 |
 
 ---
 
 ## hyperframes-video
 
+### 2.0.0 — 2026-06-05
+- Reworked into a self-contained local skill — no plugin/upstream install required
+- All authoring rules embedded directly in SKILL.md (3 non-negotiable rules, media, aspect ratios, workflow)
+- Added 3 reference files:
+  - `references/animation-patterns.md` — GSAP recipes + non-GSAP adapter registration (Lottie, Three.js, Anime.js, WAAPI, CSS)
+  - `references/cli-reference.md` — full CLI command/flag reference + prerequisite install
+  - `references/pipeline.md` — 7-step pipeline for multi-beat videos + frame.md notes
+- Removed dependency on `npx skills add heygen-com/hyperframes` (kept CLI usage only, via npx)
+
 ### 1.0.0 — 2026-06-05
 - Initial release. Quickstart skill for HeyGen's HyperFrames (HTML → MP4 video framework)
 - Captures core composition rules agents get wrong: `class="clip"`, root data attributes, paused GSAP timelines registered on `window.__timelines`
-- CLI dev loop (init → preview → render), project structure, media elements, adapter runtimes
-- Points to official upstream skills (`npx skills add heygen-com/hyperframes`) for deep runtime work
+- Pointed to official upstream skills (superseded by 2.0.0 self-contained approach)
 - Based on upstream v0.6.73
 
 ---

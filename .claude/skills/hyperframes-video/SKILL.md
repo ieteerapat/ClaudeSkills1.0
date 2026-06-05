@@ -1,19 +1,16 @@
 ---
 name: hyperframes-video
-description: Create deterministic MP4 videos from HTML/CSS and seekable animations using HeyGen's HyperFrames framework. Use whenever the user wants to generate a video, animation, product intro, social clip, data viz, chart race, captions, or docs-to-video / PDF-to-video / website-to-video with HyperFrames, or mentions hyperframes, GSAP timelines, or composition rendering.
+description: Create deterministic MP4 videos from HTML/CSS and seekable animations using the HyperFrames framework. Self-contained — no plugin required. Use whenever the user wants to generate a video, animation, product intro, social clip, data viz, chart race, captions, lower-thirds, or docs-to-video / PDF-to-video / website-to-video, or mentions hyperframes, GSAP timelines, or composition rendering.
 metadata:
-  version: "1.0.0"
+  version: "2.0.0"
   last-updated: "2026-06-05"
   author: ieteerapat
-  upstream: heygen-com/hyperframes
-  upstream-version: "v0.6.73"
+  based-on: heygen-com/hyperframes v0.6.73
 ---
 
-# HyperFrames Video
+# HyperFrames Video (Local Skill)
 
-Turn HTML + CSS + seekable animations into deterministic MP4 videos. HyperFrames is HTML-native (no React, no build step) and built for AI agents.
-
-This skill captures the HyperFrames-specific patterns that generic web docs miss — the rules the agent gets wrong without them. For the full official skill set, install upstream (see Setup).
+Turn HTML + CSS + seekable animations into deterministic MP4 videos. HyperFrames is HTML-native (no React, no build step). This skill is **self-contained** — it embeds every rule you need to author correct compositions without installing any plugin.
 
 ## When to use
 
@@ -23,91 +20,70 @@ This skill captures the HyperFrames-specific patterns that generic web docs miss
 - Adding captions, lower-thirds, kinetic text, overlays, music to a composition
 - Anything mentioning HyperFrames, GSAP timelines, or composition rendering
 
-## Setup (Do This First)
+## Prerequisites (CLI only — for preview/render)
 
-### Install the official HyperFrames skills
-
-```bash
-npx skills add heygen-com/hyperframes
-```
-
-This installs the full upstream skill set and registers slash commands in Claude Code:
-- `/hyperframes` — composition authoring
-- `/hyperframes-cli` — dev-loop commands (init, lint, preview, render)
-- `/hyperframes-media` — asset preprocessing (TTS, transcription, background removal)
-- `/tailwind` — for `init --tailwind` projects
-- `/gsap`, `/animejs`, `/css-animations`, `/lottie`, `/three`, `/waapi` — per-runtime animation help
-
-Invoke the slash command explicitly (e.g. "Using `/hyperframes`, create...") to load skill context and get correct output the first time.
-
-### Prerequisites for the CLI
-
-- **Node.js 22+** — runtime for CLI and dev server
+- **Node.js 22+** — runtime for the CLI and dev server
 - **FFmpeg** — video encoding for local renders
 - **Docker** (optional) — deterministic, reproducible renders
 
-This skill is a lightweight quickstart. When a composition needs deep runtime work (complex GSAP, Three.js, Lottie), defer to the upstream slash command for that runtime.
+The `hyperframes` CLI runs via `npx hyperframes ...` (no global install needed). You do NOT need to install agent skills/plugins — this skill carries all the authoring knowledge.
 
-## CLI Workflow (the dev loop)
+## Mental Model
 
-```bash
-# 1. Scaffold a project (interactive wizard)
-npx hyperframes init my-video
-cd my-video
+A HyperFrames video is **one or more HTML files** ("compositions"). Each visible/audible element is a **clip** placed on a **track** at a **start time** for a **duration**. Animation is **seekable**: the renderer steps frame-by-frame through headless Chrome, so animations must be driven by a paused, registered timeline — never by wall-clock (autoplay / setTimeout).
 
-# Non-interactive (CI or agent-driven):
-npx hyperframes init my-video --non-interactive --example blank
-
-# With a source video (auto transcription + captions):
-npx hyperframes init my-video --example warm-grain --video ./intro.mp4
-
-# 2. Preview in browser with hot reload
-npx hyperframes preview
-
-# 3. Render to MP4
-npx hyperframes render --output output.mp4
-
-# Add catalog blocks (transitions, overlays, charts)
-npx hyperframes add data-chart
-npx hyperframes add flash-through-white
-npx hyperframes add instagram-follow
+```
+HTML composition → headless Chrome seeks each frame → FFmpeg encodes → MP4
 ```
 
-`hyperframes init` installs AI agent skills automatically, so you can hand off to the agent at any point.
+Same input → same frames → same output. Determinism is the core contract.
 
-## Core Composition Rules (CRITICAL — agent gets these wrong without them)
+## The 3 Non-Negotiable Rules
 
-A composition is an HTML file with data attributes. Three rules are non-negotiable:
+The agent gets these wrong without explicit instruction. Always enforce them.
 
-### Rule 1: Root element attributes
+### Rule 1 — Root element attributes
 
-The root element MUST have:
-- `data-composition-id` — unique ID for this composition
-- `data-width` — pixel width (e.g. 1920)
-- `data-height` — pixel height (e.g. 1080)
+```html
+<div id="root" data-composition-id="UNIQUE_ID"
+     data-start="0" data-width="1920" data-height="1080">
+```
+- `data-composition-id` — unique ID (must match the timeline key, see Rule 3)
+- `data-width`, `data-height` — pixel dimensions
 - `data-start` — start time in seconds (usually 0)
 
-### Rule 2: Timed elements need clip markers
+### Rule 2 — Timed elements need clip markers
 
-Any element that appears/disappears on a timeline MUST have:
-- `class="clip"` — REQUIRED, or the element won't be tracked on the timeline
+Every element that appears/disappears on the timeline MUST have:
+```html
+<h1 class="clip" data-start="0" data-duration="5" data-track-index="0">…</h1>
+```
+- `class="clip"` — **REQUIRED**. Without it the element is not tracked and won't render on the timeline.
 - `data-start` — when it appears (seconds)
 - `data-duration` — how long it stays (seconds)
-- `data-track-index` — which track (0, 1, 2...) — higher tracks layer on top
+- `data-track-index` — track number; **higher index layers on top**
 
-### Rule 3: GSAP timelines must be paused and registered
+### Rule 3 — Animation timelines must be paused + registered
 
-- Create the timeline with `{ paused: true }` — HyperFrames seeks it frame-by-frame
-- Register it on `window.__timelines[compositionId]`
-- Never use wall-clock animation (setTimeout, autoplay) — only seekable/library-clock animation renders deterministically
+```html
+<script>
+  const tl = gsap.timeline({ paused: true });   // MUST be paused
+  tl.from("#title", { opacity: 0, y: -50, duration: 1 }, 0);
+  window.__timelines = window.__timelines || {};
+  window.__timelines["UNIQUE_ID"] = tl;          // key MUST match data-composition-id
+</script>
+```
+- Create with `{ paused: true }` — the renderer seeks it, it must not auto-play
+- Register on `window.__timelines[compositionId]`
+- The key MUST equal the root's `data-composition-id`
+- NEVER use `setTimeout`, autoplay, `Date.now()`, or unseeded `Math.random()` — they break determinism
 
-## Minimal Composition Template
+## Minimal Composition (copy-paste starting point)
 
 ```html
 <div id="root" data-composition-id="my-video"
      data-start="0" data-width="1920" data-height="1080">
 
-  <!-- Timed text clip on track 0 -->
   <h1 id="title" class="clip"
       data-start="0" data-duration="5" data-track-index="0"
       style="font-size: 72px; color: white; text-align: center;
@@ -116,10 +92,7 @@ Any element that appears/disappears on a timeline MUST have:
     Hello, HyperFrames!
   </h1>
 
-  <!-- Load GSAP -->
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
-
-  <!-- Paused timeline, registered on window.__timelines -->
   <script>
     const tl = gsap.timeline({ paused: true });
     tl.from("#title", { opacity: 0, y: -50, duration: 1 }, 0);
@@ -131,14 +104,44 @@ Any element that appears/disappears on a timeline MUST have:
 
 ## Media Elements (video / audio)
 
-Video and audio are clips too — same `class="clip"` + timing attributes:
+Media are clips too — same `class="clip"` + timing:
 
 ```html
 <video class="clip" data-start="0" data-duration="6" data-track-index="0"
-       src="intro.mp4" muted playsinline></video>
+       src="assets/intro.mp4" muted playsinline></video>
 
 <audio data-start="0" data-duration="6" data-track-index="2"
-       data-volume="0.5" src="music.wav"></audio>
+       data-volume="0.5" src="assets/music.wav"></audio>
+```
+- `muted playsinline` on video avoids autoplay/seek issues
+- `data-volume` (0–1) controls audio level in the final mix
+
+## CLI Dev Loop
+
+```bash
+# Scaffold (interactive wizard)
+npx hyperframes init my-video
+cd my-video
+
+# Non-interactive (CI / agent-driven)
+npx hyperframes init my-video --non-interactive --example blank
+
+# With a source video → auto transcription + captions
+npx hyperframes init my-video --example warm-grain --video ./intro.mp4
+
+# Preview in browser with hot reload
+npx hyperframes preview
+
+# Lint composition for timing/clip errors
+npx hyperframes lint
+
+# Render to MP4
+npx hyperframes render --output output.mp4
+
+# Add catalog blocks (transitions, overlays, charts)
+npx hyperframes add data-chart
+npx hyperframes add flash-through-white
+npx hyperframes add instagram-follow
 ```
 
 ## Project Structure
@@ -153,63 +156,76 @@ my-video/
 └── assets/            # video, audio, images
 ```
 
-Sub-compositions are referenced from the root with `data-composition-src`.
+Reference a sub-composition from the root:
+```html
+<div class="clip" data-start="0" data-duration="5" data-track-index="0"
+     data-composition-src="compositions/intro.html"></div>
+```
 
-## The 7-Step Pipeline (multi-beat videos)
+## Authoring Workflow (follow this order)
 
-For anything beyond a single clip, AI agents follow this structure (DESIGN → SCRIPT → STORYBOARD → ...). Use `/hyperframes` and ask for a multi-beat video; it scaffolds the pipeline. See the upstream pipeline guide for the full 7 steps.
+1. **Plan** — clarify duration, aspect ratio (16:9 = 1920×1080, 9:16 = 1080×1920, 1:1 = 1080×1080), beats, and assets.
+2. **Scaffold** — `npx hyperframes init` (or hand-write `index.html` for simple clips).
+3. **Compose** — write HTML following the 3 rules. One clip per visual element, layered by track index.
+4. **Animate** — add a paused GSAP timeline, register it. See `references/animation-patterns.md`.
+5. **Add media** — video/audio clips, with `data-volume` for audio.
+6. **Lint** — `npx hyperframes lint` catches missing clip markers and timing gaps.
+7. **Preview** — `npx hyperframes preview`, iterate with hot reload.
+8. **Render** — `npx hyperframes render --output output.mp4`.
 
-## frame.md (design system for video)
+For multi-beat videos, see the 7-step pipeline in `references/pipeline.md`.
 
-If the project has a `design.md` or `DESIGN.md`, HyperFrames uses `frame.md` to invert web design tokens for the camera (scale, no web chrome). Prefer `frame.md` over `design.md` for video specs. Browse templates at hyperframes.dev/design.
+## Aspect Ratios
 
-## Adapter Runtimes (beyond GSAP)
-
-HyperFrames supports multiple seekable animation runtimes via adapters. Each registers on a `window.__hf*` registry (e.g. `window.__hfLottie`). Use the matching slash command when a composition uses one:
-
-| Runtime | Slash command | Use for |
+| Format | Dimensions | Use |
 |---|---|---|
-| GSAP | `/gsap` | General timeline animation (default) |
-| CSS animations | `/css-animations` | Simple keyframe effects |
-| Anime.js | `/animejs` | Lightweight JS animation |
-| Lottie | `/lottie` | After Effects / JSON animations |
-| Three.js | `/three` | 3D scenes |
-| WAAPI | `/waapi` | Web Animations API |
+| Landscape 16:9 | 1920×1080 | YouTube, product demos, web |
+| Vertical 9:16 | 1080×1920 | TikTok, Reels, Shorts, Stories |
+| Square 1:1 | 1080×1080 | Instagram feed |
 
-## Example Prompts
+Set via root `data-width` / `data-height`.
+
+## Animation Runtimes
+
+GSAP is the default. HyperFrames supports other seekable runtimes via adapters, each registered on a `window.__hf*` registry. For non-GSAP runtimes (Lottie, Three.js, Anime.js, WAAPI, CSS) read `references/animation-patterns.md` for the exact registration pattern — the registration differs per runtime and is the #1 thing agents get wrong.
+
+## Example Prompts (how users will ask)
 
 ```
-Using /hyperframes, create a 10-second product intro with a fade-in title
-over a dark background and subtle background music.
+Create a 10-second product intro with a fade-in title over a dark
+background and subtle background music.
 
-Turn this CSV into an animated bar chart race using /hyperframes.
+Turn this CSV into an animated bar chart race.
 
-Make a 9:16 TikTok-style hook video about [topic] using /hyperframes,
-with bouncy captions synced to a TTS narration.
+Make a 9:16 TikTok-style hook video about [topic] with bouncy captions
+synced to a TTS narration.
 
-Summarize the attached PDF into a 45-second pitch video using /hyperframes.
+Summarize the attached PDF into a 45-second pitch video.
 ```
 
 Iterate like a video editor:
 ```
-Make the title 2x bigger, swap to dark mode, and add a fade-out at the end.
+Make the title 2x bigger, swap to dark mode, add a fade-out at the end.
 Add a lower third at 0:03 with my name and title.
 ```
 
-## Common Edge Cases / Gotchas
+## Common Failures & Fixes
 
-- **Element not appearing in render**: Missing `class="clip"`. Timed elements without it are not tracked.
-- **Animation plays in preview but not render**: Timeline wasn't created with `{ paused: true }` or wasn't registered on `window.__timelines`. The renderer seeks frames — wall-clock animation won't work.
-- **Timeline key mismatch**: The key in `window.__timelines[key]` must match the root's `data-composition-id`.
-- **Render fails / no FFmpeg**: Install FFmpeg (it's required for local renders).
-- **Non-deterministic output**: Avoid `Date.now()`, `Math.random()` without seed, autoplay, or `setTimeout`-driven animation. Use seekable adapters only.
-- **Layering wrong**: Higher `data-track-index` layers on top. Reorder tracks, not DOM order.
-- **Deep runtime work**: For complex GSAP/Three.js/Lottie, invoke the matching upstream slash command rather than improvising — those skills carry the adapter-specific registration details.
+- **Element missing from render** → missing `class="clip"`. Add it.
+- **Animation works in preview but not render** → timeline not `{ paused: true }`, or not registered on `window.__timelines`.
+- **Timeline does nothing** → key in `window.__timelines[key]` doesn't match root `data-composition-id`.
+- **Render fails immediately** → FFmpeg not installed, or Node < 22.
+- **Non-deterministic / flickering output** → autoplay, `setTimeout`, `Date.now()`, or unseeded random. Use only seekable timeline animation.
+- **Wrong layering** → adjust `data-track-index` (higher = on top), not DOM order.
+- **Audio too loud/quiet** → set `data-volume` (0–1) on the `<audio>` clip.
+- **Captions out of sync** → caption clip `data-start`/`data-duration` must match the narration timing.
 
-## References
+## Reference Files (load when needed)
 
-- Quickstart: https://hyperframes.heygen.com/quickstart
-- GitHub: https://github.com/heygen-com/hyperframes
-- Playground: https://www.hyperframes.dev
-- Catalog: https://hyperframes.heygen.com/catalog/blocks/data-chart
-- Full docs: https://hyperframes.heygen.com/introduction
+- `references/animation-patterns.md` — GSAP recipes (fade, slide, scale, stagger, lower-third, caption sync) + non-GSAP adapter registration (Lottie, Three.js, Anime.js, WAAPI, CSS)
+- `references/cli-reference.md` — full CLI command/flag reference
+- `references/pipeline.md` — the 7-step pipeline for multi-beat videos (DESIGN → SCRIPT → STORYBOARD → …) and frame.md design-system notes
+
+## Source
+
+Based on heygen-com/hyperframes (Apache 2.0, v0.6.73). Docs: https://hyperframes.heygen.com/introduction · GitHub: https://github.com/heygen-com/hyperframes
