@@ -20,25 +20,43 @@ if command -v rtk >/dev/null 2>&1; then
   echo "[ok] rtk already installed: $(rtk --version)"
 else
   echo "[..] rtk not found — installing"
-  if command -v brew >/dev/null 2>&1; then
-    echo "    using Homebrew"
-    brew install rtk
-  elif command -v curl >/dev/null 2>&1; then
-    echo "    using curl install script (-> ~/.local/bin)"
-    curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
-    # ensure ~/.local/bin is on PATH for this session
-    case ":$PATH:" in
-      *":$HOME/.local/bin:"*) : ;;
-      *) export PATH="$HOME/.local/bin:$PATH" ;;
-    esac
-  elif command -v cargo >/dev/null 2>&1; then
-    echo "    using cargo"
-    cargo install --git https://github.com/rtk-ai/rtk
-  else
-    echo "[!!] No brew, curl, or cargo found. Install one, or download a prebuilt"
-    echo "     binary from https://github.com/rtk-ai/rtk/releases"
-    exit 1
-  fi
+  OS="$(uname -s 2>/dev/null || echo unknown)"
+  case "$OS" in
+    MINGW*|MSYS*|CYGWIN*)
+      # Git Bash / MSYS on Windows — the curl install.sh does NOT support MinGW.
+      # Download the prebuilt Windows binary instead.
+      echo "    detected Windows shell ($OS) — fetching prebuilt rtk.exe"
+      DEST="/c/rtk"
+      mkdir -p "$DEST"
+      curl -fsSL -o /tmp/rtk-win.zip \
+        https://github.com/rtk-ai/rtk/releases/latest/download/rtk-x86_64-pc-windows-msvc.zip
+      unzip -o /tmp/rtk-win.zip -d /tmp/rtk-new >/dev/null
+      cp /tmp/rtk-new/rtk.exe "$DEST/rtk.exe"
+      rm -rf /tmp/rtk-win.zip /tmp/rtk-new
+      case ":$PATH:" in *":$DEST:"*) : ;; *) export PATH="$DEST:$PATH" ;; esac
+      echo "    installed to $DEST/rtk.exe (add C:\\rtk to PATH if not already)"
+      ;;
+    *)
+      if command -v brew >/dev/null 2>&1; then
+        echo "    using Homebrew"
+        brew install rtk
+      elif command -v curl >/dev/null 2>&1; then
+        echo "    using curl install script (-> ~/.local/bin)"
+        curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
+        case ":$PATH:" in
+          *":$HOME/.local/bin:"*) : ;;
+          *) export PATH="$HOME/.local/bin:$PATH" ;;
+        esac
+      elif command -v cargo >/dev/null 2>&1; then
+        echo "    using cargo"
+        cargo install --git https://github.com/rtk-ai/rtk
+      else
+        echo "[!!] No brew, curl, or cargo found. Install one, or download a prebuilt"
+        echo "     binary from https://github.com/rtk-ai/rtk/releases"
+        exit 1
+      fi
+      ;;
+  esac
 fi
 
 # 2. Verify

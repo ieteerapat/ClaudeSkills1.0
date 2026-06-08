@@ -29,9 +29,20 @@ sh installers/install-rtk.sh            # install + global hook
 sh installers/install-rtk.sh --local    # also inject into ./CLAUDE.md for this project
 ```
 
+> **Git Bash / MSYS note:** RTK's upstream `curl | sh` installer does not support MinGW. This script detects a Windows shell and downloads the prebuilt `rtk.exe` to `C:\rtk` instead. Add `C:\rtk` to your PATH if it isn't already.
+
 **Native Windows (PowerShell):**
 ```powershell
 ./installers/install-rtk.ps1
+```
+
+### Updating
+
+Re-run the installer, or for Git Bash/Windows pull the latest prebuilt binary:
+```bash
+curl -fsSL -o /tmp/rtk.zip https://github.com/rtk-ai/rtk/releases/latest/download/rtk-x86_64-pc-windows-msvc.zip
+unzip -o /tmp/rtk.zip -d /tmp/rtk-new && cp /tmp/rtk-new/rtk.exe /c/rtk/rtk.exe
+rtk init -g --auto-patch   # refresh hook + RTK.md for the new version
 ```
 
 The script auto-detects the best install method (Homebrew → curl → cargo → prebuilt binary), then runs `rtk init -g` to wire the Claude Code hook. Restart Claude Code afterward.
