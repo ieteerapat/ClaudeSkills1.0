@@ -35,8 +35,19 @@ claude-code-mcp-optimizer/
 │       │       ├── mcp-servers.md        # All Figma MCP server options + configs
 │       │       ├── property-mapping.md   # Figma → CSS exact translation tables
 │       │       └── tool-reference.md     # All 16 official tools documented
-│       └── session-memory/               # Cross-session context preservation
-│           └── SKILL.md
+│       ├── session-memory/               # Cross-session context preservation
+│       │   └── SKILL.md
+│       └── hyperframes-video/            # HTML → MP4 video (self-contained)
+│           ├── SKILL.md
+│           └── references/
+│               ├── animation-patterns.md # GSAP + adapter registration recipes
+│               ├── cli-reference.md       # Full CLI commands + prerequisites
+│               └── pipeline.md            # 7-step multi-beat video pipeline
+├── installers/
+│   ├── install-rtk.sh                     # RTK token-saver installer (macOS/Linux/WSL/Git Bash)
+│   ├── install-rtk.ps1                    # RTK installer (native Windows)
+│   └── README.md                          # RTK setup + usage guide
+├── CHANGELOG.md                           # Per-skill version history
 ├── README.md
 └── SOURCES.md                            # All research links
 ```
@@ -97,7 +108,7 @@ export MAX_MCP_OUTPUT_TOKENS=100000
 
 | Tool | What It Does | Install |
 |---|---|---|
-| [RTK](https://github.com/rtk-ai/rtk) | Compresses bash output 60-90% | `cargo install rtk-lite-cc` |
+| [RTK](https://github.com/rtk-ai/rtk) | Compresses bash output 60-90% | **`sh installers/install-rtk.sh`** (see [installers/](./installers/)) |
 | [Context Mode](https://github.com/mksglu/context-mode) | Sandboxes MCP output, 98% reduction | `/plugin marketplace add mksglu/context-mode` |
 | [CodeGraph](https://github.com/colbymchenry/codegraph) | Knowledge graph, 92% fewer tool calls | `npx @colbymchenry/codegraph` |
 | [Claude-Mem](https://github.com/thedotmack/claude-mem) | Persistent memory across sessions | `npx claude-mem install` |

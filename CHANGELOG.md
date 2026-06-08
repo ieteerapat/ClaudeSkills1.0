@@ -65,5 +65,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com). Skills follow se
 
 ## Package History
 
+- **2026-06**: Added `installers/` — RTK (Rust Token Killer) installer scripts for macOS/Linux/WSL/Git Bash (`install-rtk.sh`) and native Windows (`install-rtk.ps1`). RTK is a CLI tool, not a skill — it ships its own Claude Code hook via `rtk init -g`, so it's delivered as an installer rather than a redundant skill.
+- **2026-06**: Refactored from 7 skills to 2 after agentskills.io evaluation, then added hyperframes-video (3 total).
+
 - **2026-06**: Refactored from 7 skills to 2 after agentskills.io evaluation. Removed token-saver, output-filter, model-routing, mcp-token-optimizer, figma-design-to-code (absorbed into CLAUDE.md or merged into figma-accuracy).
 - **2026-06**: All skills validated against the [Agent Skills specification](https://agentskills.io/specification).
