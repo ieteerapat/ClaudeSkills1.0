@@ -1,6 +1,6 @@
 # Claude Code MCP Optimizer
 
-A lean skills package for Claude Code focused on **Figma MCP accuracy** and **token efficiency**. Validated against the [agentskills.io](https://agentskills.io) open standard.
+A skills package for Claude Code focused on **Figma MCP accuracy**, **token efficiency**, **persistent memory** (Obsidian vault), and **video authoring** (HyperFrames). Includes companion-tool installers (RTK, Obsidian MCP). Validated against the [agentskills.io](https://agentskills.io) open standard.
 
 ## Philosophy
 
