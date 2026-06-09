@@ -1,0 +1,14 @@
+{
+  "_comment": "Template for project-scoped Obsidian MCP. Copy to .mcp.json and fill in your API key. The real .mcp.json is gitignored. Prefer the installer: sh installers/setup-obsidian-mcp.sh",
+  "mcpServers": {
+    "obsidian": {
+      "command": "uvx",
+      "args": ["mcp-obsidian"],
+      "env": {
+        "OBSIDIAN_API_KEY": "<paste-your-local-rest-api-key-here>",
+        "OBSIDIAN_HOST": "127.0.0.1",
+        "OBSIDIAN_PORT": "27124"
+      }
+    }
+  }
+}

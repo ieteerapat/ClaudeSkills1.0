@@ -71,6 +71,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com). Skills follow se
 
 ## Package History
 
+- **2026-06**: Added Obsidian MCP integration — `installers/setup-obsidian-mcp.sh` connects Claude Code to the vault via mcp-obsidian (Local REST API plugin) for semantic search + structured note ops. API key is gitignored; falls back to plain file access (no MCP) when not set up.
 - **2026-06**: Added Obsidian vault (`vault/`) + `setup-obsidian-vault.sh` installer — persistent memory store for the session-memory skill. Obsidian installed/registered locally; vault path merged into `obsidian.json` without disturbing existing vaults.
 
 - **2026-06**: Added `installers/` — RTK (Rust Token Killer) installer scripts for macOS/Linux/WSL/Git Bash (`install-rtk.sh`) and native Windows (`install-rtk.ps1`). RTK is a CLI tool, not a skill — it ships its own Claude Code hook via `rtk init -g`, so it's delivered as an installer rather than a redundant skill.

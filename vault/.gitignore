@@ -4,3 +4,6 @@
 .obsidian/cache
 .trash/
 _attachments/
+
+# SECRET — Local REST API key is per-machine, never commit it
+.obsidian/plugins/obsidian-local-rest-api/data.json
