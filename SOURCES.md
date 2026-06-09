@@ -30,6 +30,12 @@ Repositories, tools, and docs **actually used** by this repo. Pruned to what the
 |---|---|---|
 | Obsidian | Vault app the memory store runs in | https://obsidian.md |
 
+### api-token-optimization
+| Resource | Used for | Link |
+|---|---|---|
+| amunozdev/token-optimizer | Source of the API caching/batch/effort patterns (MIT) | https://github.com/amunozdev/token-optimizer |
+| Anthropic prompt caching docs | Cache breakpoint rules + gotchas | https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching |
+
 ## Installers
 
 ### RTK (installers/install-rtk.*)
@@ -66,3 +72,4 @@ Repositories, tools, and docs **actually used** by this repo. Pruned to what the
 ---
 
 _Removed 2026-06: ~30 research-only links (early token-tool survey, hook articles, model-routing, and design-to-code blog posts) that no skill, installer, or doc in this repo references. See git history if you need them._
+

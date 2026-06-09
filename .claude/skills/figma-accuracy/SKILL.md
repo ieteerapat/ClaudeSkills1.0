@@ -2,8 +2,8 @@
 name: figma-accuracy
 description: Ensures pixel-perfect accuracy when reading and implementing Figma designs via MCP. Enforces correct tool sequence, handles large designs, validates against screenshots, and uses design system rules for consistent output. Use whenever implementing UI from Figma MCP data.
 metadata:
-  version: "1.2.0"
-  last-updated: "2026-06-05"
+  version: "1.3.0"
+  last-updated: "2026-06-08"
   author: ieteerapat
 ---
 
@@ -39,8 +39,24 @@ claude plugin install figma@claude-plugins-official
 
 This single command installs:
 - Figma MCP server (remote, HTTP-based, `https://mcp.figma.com/mcp`)
-- Agent Skills: `figma-implement-design`, `figma-create-design-system-rules`, `figma-code-connect`
+- Agent Skills (the official set — see below)
 - Asset handling rules
+
+### Official Figma skills bundled with the plugin (as of June 2026)
+
+| Skill | Use for |
+|---|---|
+| `figma-use` | Write to canvas — create frames, components, variables, layouts |
+| `figma-use-figjam` | Write to FigJam boards (stickies, sections, connectors) |
+| `figma-use-slides` | Write to Figma Slides decks |
+| `figma-swiftui` | SwiftUI ↔ Figma bidirectional (iOS, SF Symbols, HIG tokens) |
+| `figma-code-connect` | Map published components to code (Dev Mode links) |
+| `figma-create-new-file` | Create a blank design/FigJam file |
+| `figma-generate-diagram` | Description → editable FigJam diagram |
+| `figma-generate-library` | Build/sync a design system library from your codebase |
+| `figma-generate-design` | Push a page/screen from code into Figma |
+
+For reading/implementing designs (this skill's focus), the relevant ones are `figma-code-connect` (component mapping) and the read tools below. For writing back to Figma, use `figma-use` and friends.
 
 If you prefer manual setup:
 ```bash

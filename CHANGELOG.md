@@ -7,9 +7,45 @@ Format based on [Keep a Changelog](https://keepachangelog.com). Skills follow se
 
 | Skill | Version | Last Updated |
 |---|---|---|
-| figma-accuracy | 1.2.0 | 2026-06-05 |
+| figma-accuracy | 1.3.0 | 2026-06-08 |
+| api-token-optimization | 1.0.0 | 2026-06-08 |
 | session-memory | 1.1.0 | 2026-06-08 |
 | hyperframes-video | 2.0.0 | 2026-06-05 |
+
+---
+
+## api-token-optimization
+
+### 1.0.0 — 2026-06-08
+- New skill for direct Anthropic API cost optimization (fills the API-side gap; CLAUDE.md covers Claude Code session tuning)
+- Prompt caching (90% off reads) with the cache-invalidation gotchas: images break cache, volatile-before-breakpoint, concurrency miss, per-model min token thresholds
+- Batch API (50% off, stacks with caching), effort/budget_tokens tuning, prefill, token-efficient tools, dynamic tool loading
+- Diagnostic workflow (measure → identify → apply → verify) + verification checklist
+- Adapted from amunozdev/token-optimizer v1.4.0 (MIT)
+
+## figma-accuracy
+
+### 1.3.0 — 2026-06-08
+- Documented the expanded official Figma skill set (June 2026): added figma-use-slides, figma-swiftui, figma-generate-library to the bundled-skills table
+- Clarified which official skills matter for reading vs writing to Figma
+
+### 1.2.0 — 2026-06-05
+- Added Code to Canvas bidirectional workflow (live UI → Figma → back to code)
+- Updated supported clients list to June 2026 (Augment, Codex, Cursor, Factory, Firebender, VS Code, Warp)
+- Added version metadata to frontmatter
+- Fixed date label on MCP Server Options table (May → June 2026)
+
+### 1.1.0 — 2026-05
+- Switched to official Figma plugin setup: `claude plugin install figma@claude-plugins-official`
+- Updated remote MCP server URL to `https://mcp.figma.com/mcp`
+- Documented all 16 official Figma MCP tools with rate-limit status
+- Added `references/mcp-servers.md`, `references/property-mapping.md`, `references/tool-reference.md`
+
+### 1.0.0 — initial
+- 3-layer accuracy stack (design system rules → Code Connect → structured read workflow)
+- Correct tool call sequence (metadata → context → screenshot → variables)
+- Large design handling, font weight / auto-layout / color mapping tables
+- Validation checklist and common failure fixes
 
 ---
 
@@ -29,28 +65,6 @@ Format based on [Keep a Changelog](https://keepachangelog.com). Skills follow se
 - Captures core composition rules agents get wrong: `class="clip"`, root data attributes, paused GSAP timelines registered on `window.__timelines`
 - Pointed to official upstream skills (superseded by 2.0.0 self-contained approach)
 - Based on upstream v0.6.73
-
----
-
-## figma-accuracy
-
-### 1.2.0 — 2026-06-05
-- Added Code to Canvas bidirectional workflow (live UI → Figma → back to code)
-- Updated supported clients list to June 2026 (Augment, Codex, Cursor, Factory, Firebender, VS Code, Warp)
-- Added version metadata to frontmatter
-- Fixed date label on MCP Server Options table (May → June 2026)
-
-### 1.1.0 — 2026-05
-- Switched to official Figma plugin setup: `claude plugin install figma@claude-plugins-official`
-- Updated remote MCP server URL to `https://mcp.figma.com/mcp`
-- Documented all 16 official Figma MCP tools with rate-limit status
-- Added `references/mcp-servers.md`, `references/property-mapping.md`, `references/tool-reference.md`
-
-### 1.0.0 — initial
-- 3-layer accuracy stack (design system rules → Code Connect → structured read workflow)
-- Correct tool call sequence (metadata → context → screenshot → variables)
-- Large design handling, font weight / auto-layout / color mapping tables
-- Validation checklist and common failure fixes
 
 ---
 

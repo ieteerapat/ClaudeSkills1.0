@@ -63,5 +63,6 @@
 
 ## Available Skills (this repo)
 - `figma-accuracy` — pixel-perfect Figma MCP implementation (tool sequence, validation, Code Connect)
+- `api-token-optimization` — direct Anthropic API cost cuts (prompt caching, Batch API, effort tuning)
 - `session-memory` — persist/restore context across compactions via the vault
 - `hyperframes-video` — author HTML→MP4 videos (self-contained, no plugin)
