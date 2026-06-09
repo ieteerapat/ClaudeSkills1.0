@@ -1,0 +1,9 @@
+{
+  "alwaysUpdateLinks": true,
+  "newFileLocation": "folder",
+  "newFileFolderPath": "Sessions",
+  "attachmentFolderPath": "_attachments",
+  "userIgnoreFilters": [
+    ".claude/"
+  ]
+}

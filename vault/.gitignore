@@ -1,0 +1,6 @@
+# Obsidian per-machine cache / UI state — not worth committing
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/cache
+.trash/
+_attachments/

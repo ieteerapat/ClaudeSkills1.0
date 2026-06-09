@@ -8,7 +8,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com). Skills follow se
 | Skill | Version | Last Updated |
 |---|---|---|
 | figma-accuracy | 1.2.0 | 2026-06-05 |
-| session-memory | 1.0.0 | 2026-06-05 |
+| session-memory | 1.1.0 | 2026-06-08 |
 | hyperframes-video | 2.0.0 | 2026-06-05 |
 
 ---
@@ -56,6 +56,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com). Skills follow se
 
 ## session-memory
 
+### 1.1.0 — 2026-06-08
+- Added Obsidian vault (`vault/`) as the persistent memory store
+- Session notes → `vault/Sessions/`, durable facts → `vault/Knowledge/`, linked with wikilinks
+- Falls back to `.claude/memory/session-state.md` when no vault is present
+- Added `installers/setup-obsidian-vault.sh` (installs Obsidian, registers the vault path locally)
+
 ### 1.0.0 — 2026-06-05
 - Save/restore session state to `.claude/memory/session-state.md`
 - Avoids re-fetching cached data and re-reading unchanged files across compactions
@@ -64,6 +70,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com). Skills follow se
 ---
 
 ## Package History
+
+- **2026-06**: Added Obsidian vault (`vault/`) + `setup-obsidian-vault.sh` installer — persistent memory store for the session-memory skill. Obsidian installed/registered locally; vault path merged into `obsidian.json` without disturbing existing vaults.
 
 - **2026-06**: Added `installers/` — RTK (Rust Token Killer) installer scripts for macOS/Linux/WSL/Git Bash (`install-rtk.sh`) and native Windows (`install-rtk.ps1`). RTK is a CLI tool, not a skill — it ships its own Claude Code hook via `rtk init -g`, so it's delivered as an installer rather than a redundant skill.
 - **2026-06**: Refactored from 7 skills to 2 after agentskills.io evaluation, then added hyperframes-video (3 total).

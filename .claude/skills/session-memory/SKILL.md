@@ -2,8 +2,8 @@
 name: session-memory
 description: Preserves critical context across compactions and sessions. Saves work state to files before compaction hits, restores context in new sessions. Use when working on long tasks that span multiple sessions or when context is getting full.
 metadata:
-  version: "1.0.0"
-  last-updated: "2026-06-05"
+  version: "1.1.0"
+  last-updated: "2026-06-08"
   author: ieteerapat
 ---
 
@@ -17,6 +17,15 @@ Prevent context loss during compaction by persisting critical state to files.
 - Working on multi-session tasks
 - Before manually compacting
 - Starting a new session on an ongoing task
+
+## Storage location
+
+This repo ships an Obsidian vault at `vault/` as the persistent store. Prefer it when present:
+- Session notes → `vault/Sessions/YYYY-MM-DD-<slug>.md` (use `vault/_templates/session.md`)
+- Durable facts → `vault/Knowledge/` (use `vault/_templates/knowledge.md`)
+- Link related notes with `[[wikilinks]]` so the graph stays connected
+
+Fallback when no vault exists: `.claude/memory/session-state.md` (format below).
 
 ## Instructions
 

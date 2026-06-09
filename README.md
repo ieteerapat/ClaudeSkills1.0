@@ -46,7 +46,16 @@ claude-code-mcp-optimizer/
 ├── installers/
 │   ├── install-rtk.sh                     # RTK token-saver installer (macOS/Linux/WSL/Git Bash)
 │   ├── install-rtk.ps1                    # RTK installer (native Windows)
+│   ├── setup-obsidian-vault.sh           # Install Obsidian + register the vault locally
 │   └── README.md                          # RTK setup + usage guide
+├── vault/                                 # Obsidian vault — persistent memory store
+│   ├── .obsidian/                         # Obsidian config (makes it a vault)
+│   ├── Index.md                           # vault home / map of content
+│   ├── Sessions/                          # one note per work session
+│   ├── Knowledge/                         # durable facts and decisions
+│   ├── Daily/                             # daily notes
+│   ├── _templates/                        # session / knowledge / daily templates
+│   └── README.md                          # vault guide
 ├── CHANGELOG.md                           # Per-skill version history
 ├── README.md
 └── SOURCES.md                            # All research links
