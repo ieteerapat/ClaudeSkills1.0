@@ -45,6 +45,11 @@ Each phase lists: command(s) + the ONE reference to read. Do not pre-read others
 - `node scripts/urlmap.mjs` → `migration/url-map.json` + host-level redirect plan.
 - Read `references/seo-rules.md`. Set config `urlmap_approved:false`; notify the
   user; proceed only when flipped true (or `auto_approve_urlmap:true`).
+- `node scripts/report.mjs` → writes `reports/migration-summary.html`: a
+  self-contained HTML recon summary (config, scope by status/type/locale, URL
+  map + redirect count, flags/blockers, full page list). This is the
+  human-readable artifact to review at the URL-map approval gate. Information
+  gathering (intake + seed + url-map) is complete at this point.
 
 ### Phase 1.25 — Calibration (once; validates the harness, attended)
 - Capture 2 representative pages, then compare each **against itself**
@@ -56,11 +61,16 @@ Each phase lists: command(s) + the ONE reference to read. Do not pre-read others
 The ORCHESTRATOR lays the rails here so build subagents COMPOSE from a known
 kit instead of inventing — this is the primary defense against subagents
 hallucinating structure and drifting from the path.
-- Read `references/targets/<target>.md`. From captured computed styles across
-  sample fixtures, extract tokens (palette, type scale, spacing, breakpoints)
-  into the target's theme config. Build shared chrome (header/nav, footer,
-  locale switcher) once, each verified by mini-parity. Establish one template
-  per manifest `type` — the FIRST page of each type is the template page.
+- Read `references/targets/<target>.md`. Extract tokens from the AUTHORED CSS
+  in `fixtures/<id>/authored-css.json` (custom properties, type scale in
+  rem/em, spacing scale, real media-query breakpoints, @font-face) — NOT from
+  computed styles. getComputedStyle flattens rem→px, drops var()/clamp(), and
+  can't see breakpoints; using it builds a px-soup theme that loses the
+  source's design system. Computed `styles.json` is a CROSS-CHECK / fallback
+  only (gaps where the source has no token). Carry the source's own token
+  NAMES where present (C.I. fidelity). Then build shared chrome (header/nav,
+  footer, locale switcher) once, each verified by mini-parity; establish one
+  template per manifest `type` — the FIRST page of each type is the template.
 - WRITE `PROJECT_ROOT/migration/build-contract.md` — the project-specific,
   frozen rules every build subagent must obey (see references/build-contract.md
   for the required sections: file/dir layout, component inventory + import
@@ -142,6 +152,9 @@ unattended run grind a broken harness across the whole manifest.
   on key pages, Lighthouse/CWV ≥ source baseline.
 - `manifest.mjs status` → final report: counts by status + every needs_human and
   failed page listed. Update the vault current-truth note. Notify user.
+- `node scripts/report.mjs` → regenerates `reports/migration-summary.html` with
+  final results (passed %, needs_human, failed). Same artifact as the recon
+  summary, now showing outcomes — hand this to the user as the wrap-up report.
 
 ### Phase 5 — Cutover (checklist, human executes DNS)
 - Emit redirects for the host (from config), deploy to staging, run smoke against
@@ -184,6 +197,16 @@ unattended run grind a broken harness across the whole manifest.
   `public-assets/`. Never hotlink infrastructure that dies at cutover.
 - Genuine third-party embeds (YouTube/Vimeo/Maps/LINE) → keep as embeds.
 - DRM/streaming/auth-gated → needs_human.
+
+## Integrations & secrets (see references/integrations.md)
+
+Third-party keys/IDs are detected at intake and classified into three tiers:
+Tier 1 public IDs (GTM/GA/Pixel) → env var + owner confirms property; Tier 2
+domain-restricted keys (Maps/reCAPTCHA) → preserved but flagged needs_owner
+(re-key or allow-list the new domain); Tier 3 server secrets (form/payment) →
+unrecoverable from the scrape, must_provision. NEVER hardcode a key or commit
+a secret — everything is an env var; secrets live in gitignored `.env.local`.
+Inventory: `migration/integrations.json`; documented in `.env.example`.
 
 ## Human touchpoints (the complete list — four)
 

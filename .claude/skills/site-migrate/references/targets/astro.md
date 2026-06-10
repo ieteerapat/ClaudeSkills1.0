@@ -12,6 +12,10 @@ this file holds only the Astro-specific conventions.
 - Content collections: `content/` MDX with a zod schema mirroring the
   extraction frontmatter (title, description, canonical, og, schema, locale,
   type, source_url, captured_at).
+- Design tokens (Phase 1.5): derive from `fixtures/<id>/authored-css.json`
+  (custom properties, rem/em type scale, real media-query breakpoints,
+  @font-face) — NOT computed styles, which flatten everything to px and lose
+  var()/clamp()/breakpoints. Computed styles.json is a cross-check only.
 - Per-type templates (Phase 1.5): one layout per manifest `type` in
   `src/layouts/`; shared chrome in `src/components/`.
 - i18n: mirror source locale URL structure as literal route dirs

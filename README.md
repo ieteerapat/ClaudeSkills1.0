@@ -79,7 +79,7 @@ claude-code-mcp-optimizer/
 | `api-token-optimization` | 1.0.0 | Agent gets prompt-cache invalidation wrong (images break cache, volatile-before-breakpoint) without it | Direct Anthropic API cost cuts: prompt caching (90%), Batch API (50%), effort tuning, prefill — fills the API-side gap |
 | `session-memory` | 1.1.0 | Agent has no built-in way to persist state across compactions | Saves/restores work state to files so you never re-discover the same codebase |
 | `hyperframes-video` | 2.0.0 | Agent gets HyperFrames composition rules wrong (clip markers, paused timelines, registration) without them | Self-contained: create deterministic MP4 videos from HTML/CSS + GSAP. Reference files for animation, CLI, and pipeline |
-| `site-migrate` | 1.1.0 | Agent has no reliable parity-gated migration loop; without it "done" means "built" not "matches source" | Stack-agnostic site migration engine (WordPress/crawl → Next.js+Tailwind/Astro). Intake → golden-fixture capture (Playwright) → manifest-driven per-page loop → parity gate. Bundled scripts + references |
+| `site-migrate` | 1.5.0 | Agent has no reliable parity-gated migration loop; without it "done" means "built" not "matches source" | Stack-agnostic site migration engine (WordPress/crawl → Next.js+Tailwind/Astro). Intake → golden-fixture capture (Playwright) → manifest-driven per-page loop → parity gate. Bundled scripts + references |
 
 See [CHANGELOG.md](./CHANGELOG.md) for version history.
 

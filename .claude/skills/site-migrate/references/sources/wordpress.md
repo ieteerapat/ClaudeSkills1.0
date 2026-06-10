@@ -22,10 +22,25 @@ it in the partial-translation inventory and flag the manifest row — NEVER
 generate the missing locale by translating. Model translation is invented
 content (fidelity violation) and a token sink.
 
-## Content extraction (extract.mjs) — NEVER DOM-scrape what REST provides
+## Content extraction (extract.mjs) — DOM-first, REST as default-locale enrichment
 
-- Body: `content.rendered` from REST → MDX. Metadata: title, slug, date,
-  modified, excerpt, featured_media, categories, tags, author → frontmatter.
+REST is NOT universally reliable for this stack. Two failure modes determine
+the strategy (extract.mjs implements this — DOM-first by default):
+- **Page builders (Bricks/Elementor/Divi):** layout lives in postmeta, so
+  `content.rendered` is empty or partial for builder-built page types. Detect
+  `brxe-`/`elementor-`/`et_pb_` classes in the captured DOM → extract body from
+  the rendered-DOM fixture, stripping the builder's layout wrappers but keeping
+  content.
+- **TranslatePress/WPML on-the-fly translation:** REST `?slug=` returns the
+  DEFAULT language for every locale (no `lang`/`translations` fields). So for
+  any non-default locale, REST yields the WRONG language — extract from that
+  locale's rendered-DOM fixture (captured at the prefixed URL) instead.
+
+Rule: REST `content.rendered` is used ONLY when (a) default locale AND (b) the
+body is substantial (>200 text chars). Otherwise the per-locale DOM fixture is
+the source of truth. Metadata still usable from REST for the default locale:
+title, slug, date, excerpt → frontmatter. HEAD meta (canonical/OG/schema) comes
+from the captured per-locale HEAD regardless.
 - SEO plugin meta (Yoast/RankMath): exposed via REST `yoast_head_json` or
   similar if present; otherwise harvest canonical/OG/schema from the captured
   fixture HEAD (fixture is atomic with extraction, so it's consistent).

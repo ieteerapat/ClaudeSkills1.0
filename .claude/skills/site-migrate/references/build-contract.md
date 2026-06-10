@@ -33,6 +33,11 @@ Subagents treat it as read-only law.
 6. **Island / interactivity rules** — what may be a client component and what
    must stay static; the approved pattern for forms/slider/locale-switcher
    (from config form_policy + the prebuilt chrome).
+6b. **Direction (RTL)** — if config `rtl_locales` is non-empty, the rule for
+   building those locales: `dir="rtl"` on `<html>`, logical CSS properties /
+   Tailwind `rtl:` + inline-start/end utilities, never hardcoded left/right.
+   One template serves both directions via logical properties — do NOT fork a
+   separate RTL template.
 7. **Hard "do NOT" list** — do not create or modify shared components; do not
    rename or move existing files; do not introduce a new styling approach,
    state library, or dependency; do not invent URLs (use the url-map); do not

@@ -19,10 +19,13 @@ const ALL_DIMENSIONS = ['layout', 'fonts', 'texts', 'seo_meta', 'links', 'media'
 
 function enabledDimensions(config) {
   const f = config.fidelity;
-  if (!f || f === 'all' || f === 'full') return ALL_DIMENSIONS;
-  if (Array.isArray(f)) return ALL_DIMENSIONS.filter((d) => f.includes(d));
-  if (typeof f === 'object') return ALL_DIMENSIONS.filter((d) => f[d] !== false);
-  return ALL_DIMENSIONS;
+  let dims = ALL_DIMENSIONS;
+  if (Array.isArray(f)) dims = ALL_DIMENSIONS.filter((d) => f.includes(d));
+  else if (f && typeof f === 'object') dims = ALL_DIMENSIONS.filter((d) => f[d] !== false);
+  // seo_meta is mandated by seo-rules.md at every seo_bar — never opt-in via
+  // the fidelity vocabulary (whose names don't include it)
+  if (!dims.includes('seo_meta')) dims = [...dims, 'seo_meta'];
+  return dims;
 }
 
 function readText(path) {
@@ -178,8 +181,12 @@ function normalizePath(p) {
   return p || '/';
 }
 
-function classifyHref(href, sourceOrigin) {
+function classifyHref(href, sourceOrigin, pagePath = '/') {
   if (!href || href === '#' || /^(javascript|mailto|tel|sms):/i.test(href)) return null;
+  // fragment-only links resolve to the page itself (seo-rules: resolve
+  // relative URLs against the page URL) — otherwise a source TOC like
+  // https://site/page/#x vs candidate #x reads as a missing self-link
+  if (href.startsWith('#')) return { internal: true, path: normalizePath(pagePath) };
   try {
     if (href.startsWith('/')) return { internal: true, path: normalizePath(href.split('#')[0].split('?')[0]) };
     const u = new URL(href);
@@ -195,8 +202,10 @@ function compareLinks({ fixtureDir, candDir, sourceUrl, candidateUrl, urlMap }) 
   const candOrigin = (() => { try { return new URL(candidateUrl || sourceUrl).origin; } catch { return null; } })();
   const mapPath = (p) => normalizePath(urlMap?.[p] ?? urlMap?.[p + '/'] ?? p);
 
-  const fixture = extractHrefs(readText(join(fixtureDir, 'dom.html'))).map((h) => classifyHref(h, sourceOrigin)).filter(Boolean);
-  const cand = extractHrefs(readText(join(candDir, 'dom.html'))).map((h) => classifyHref(h, candOrigin)).filter(Boolean);
+  const sourcePagePath = (() => { try { return new URL(sourceUrl).pathname; } catch { return '/'; } })();
+  const candPagePath = (() => { try { return new URL(candidateUrl || sourceUrl).pathname; } catch { return '/'; } })();
+  const fixture = extractHrefs(readText(join(fixtureDir, 'dom.html'))).map((h) => classifyHref(h, sourceOrigin, sourcePagePath)).filter(Boolean);
+  const cand = extractHrefs(readText(join(candDir, 'dom.html'))).map((h) => classifyHref(h, candOrigin, candPagePath)).filter(Boolean);
 
   const expectedInternal = new Set(fixture.filter((l) => l.internal).map((l) => mapPath(l.path)));
   const candInternal = new Set(cand.filter((l) => l.internal).map((l) => normalizePath(l.path)));
@@ -206,18 +215,25 @@ function compareLinks({ fixtureDir, candDir, sourceUrl, candidateUrl, urlMap }) 
   const missingInternal = [...expectedInternal].filter((p) => !candInternal.has(p));
   const missingExternal = [...expectedExternal].filter((h) => !candExternal.has(h));
   const extraInternal = [...candInternal].filter((p) => !expectedInternal.has(p));
+  const extraExternal = [...candExternal].filter((h) => !expectedExternal.has(h));
 
   const missing = [...missingInternal, ...missingExternal];
+  const extra = [...extraInternal, ...extraExternal];
+  // seo-rules.md: the FULL link inventory must match — a link the source never
+  // had is an alteration, same as a lost one
   const dim = {
-    pass: missing.length === 0,
+    pass: missing.length === 0 && extra.length === 0,
     expected: expectedInternal.size + expectedExternal.size,
     found: candInternal.size + candExternal.size,
   };
-  if (!dim.pass) {
+  if (missing.length) {
     dim.missing = missing.slice(0, 5);
     dim.worst_offender = missing[0];
   }
-  if (extraInternal.length) dim.extra = extraInternal.slice(0, 5);
+  if (extra.length) {
+    dim.extra = extra.slice(0, 5);
+    dim.worst_offender = dim.worst_offender ?? `extra link: ${extra[0]}`;
+  }
   return dim;
 }
 

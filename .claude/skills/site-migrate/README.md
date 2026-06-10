@@ -1,10 +1,37 @@
-# site-migrate — Claude Code skill
+# site-migrate — Claude Code skill (v1.5)
 
 Stack-agnostic website migration engine for Claude Code. Migrates a site to a
 new stack (e.g. WordPress → Next.js/Tailwind static, or → Astro) with near-zero
 human intervention: intake-first configuration, golden-fixture capture via
 Playwright, manifest-driven per-page loop, and a parity gate — a page is never
 "done" until it mechanically matches the captured source within tolerance.
+
+## v1.5 highlights
+
+- **Staging noindex guard** — staging is non-indexable; cutover flips to
+  indexable; smoke.mjs asserts no `noindex` ever ships to production.
+- **Multi-script font subsetting**, **archive/pagination parity**, **search
+  (Pagefind) intake question**, **functional consent (PDPA/GDPR) requirement** —
+  surfaced as rules/decisions so they aren't late surprises.
+
+## v1.4 highlights
+
+- **DOM-first extraction** — REST is used only as default-locale enrichment.
+  Fixes on-the-fly translation stacks (TranslatePress/WPML — REST returns the
+  default language for every locale) and page builders (Bricks/Elementor —
+  layout lives in postmeta, not content.rendered). Verified: an /ar/ page now
+  extracts Arabic, not English.
+- **RTL support** — `rtl_locales` drives `dir="rtl"` + logical-CSS builds;
+  parity needs no change (each locale compares against its own fixture).
+- **Authored-CSS extraction** — design tokens come from the source's real
+  custom properties / rem-em scale / media-query breakpoints / @font-face,
+  not computed px (which flattens rem→px and loses var()/clamp()/breakpoints).
+- **Integrations & secrets handling** — three-tier model for third-party
+  keys (GTM/GA public IDs, domain-restricted Maps/reCAPTCHA, server secrets);
+  env-var'd, never hardcoded, gaps surfaced as owner actions.
+- **HTML summary report** (`report.mjs`) at the recon gate and at wrap-up.
+- **Build contract** so build subagents compose from a fixed kit, not improvise.
+- Lazy per-page spawning + model tiering for token-cost discipline.
 
 ## Install
 

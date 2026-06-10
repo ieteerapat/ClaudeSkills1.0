@@ -35,14 +35,21 @@ a verify gate before the next (Karpathy: goal-driven, verifiable).
 - `intake.mjs <url> [--json]` → probe report; with answers file → writes
   migration.config.json + copies defaults + places .migration/smoke.mjs.
 - `capture.mjs <id> [--calibrate]` → fixtures/<id>/ (screenshots×viewports,
-  rendered DOM, computed styles, a11y, HAR, HEAD meta, rest.json if WP) +
-  captured_at. Atomic with extraction input. --calibrate captures twice.
+  rendered DOM, computed styles.json [PARITY source], authored-css.json
+  [DESIGN-SYSTEM source: custom props, rem/em type scale, real breakpoints,
+  @font-face, fetched cross-origin sheets], a11y, HAR, HEAD meta, rest.json if
+  WP) + captured_at. Atomic with extraction input. --calibrate captures twice.
+  NOTE: computed styles = parity diff; authored CSS = Phase 1.5 tokens. Never
+  build the theme from computed px (loses rem/var/clamp/breakpoints).
 - `extract.mjs <id>` → content/<locale>/<slug>.mdx + media inventory + download
   queue processed into public-assets/.
 - `compare.mjs <id> <candidate-url> [--calibrate]` → reports/<id>/ + exit 0/1/2.
 - `seed.mjs` → manifest rows page×locale from adapter enumeration.
 - `urlmap.mjs [--emit-redirects]` → url-map.json + host-format redirect file.
 - `smoke.mjs [--fast] [--ci]` → site-wide checks; nonzero exit on failure.
+- `report.mjs [--open]` → renders reports/migration-summary.html (self-contained,
+  no deps) from config + manifest + url-map. Run at the URL-map gate (recon
+  summary) and at wrap-up (final results). --open launches the browser.
 
 ## Statuses
 

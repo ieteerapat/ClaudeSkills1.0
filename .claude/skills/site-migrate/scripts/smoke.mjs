@@ -10,7 +10,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { join, resolve, dirname, posix, extname } from 'node:path';
 import {
-  ROOT, MANIFEST_PATH, importFromProject, readJson, writeJsonAtomic, die, summary,
+  ROOT, MANIFEST_PATH, CONFIG_PATH, importFromProject, readJson, writeJsonAtomic, die, summary,
 } from './lib/project.mjs';
 
 // ---- args -------------------------------------------------------------------
@@ -126,6 +126,23 @@ function htmlFiles(dir, out = []) {
   return out;
 }
 const allHtml = htmlFiles(exportDir);
+
+// ---- 4a. noindex guard (catastrophic if shipped to production) -----------------------
+// Production must NOT contain noindex. Staging SHOULD (config.staging_noindex).
+// This asserts the cutover flip happened — a noindex tag in a production build
+// silently de-indexes the whole site.
+{
+  const cfg = readJson(CONFIG_PATH, {});
+  const noindexed = allHtml.filter((f) =>
+    /<meta[^>]+name=["']robots["'][^>]*content=["'][^"']*noindex/i.test(readFileSync(f, 'utf8')));
+  if (cfg.staging_noindex) {
+    check('staging-noindex', true, [`${noindexed.length}/${allHtml.length} pages noindex (staging)`]);
+  } else {
+    check('production-indexable', noindexed.length === 0,
+      noindexed.slice(0, 10).map((f) => f.replace(exportDir, '')),
+      'noindex meta found in a production build — would de-index the site');
+  }
+}
 {
   const dead = [];
   const hrefRe = /<a\b[^>]*?\bhref\s*=\s*("([^"]*)"|'([^']*)')/gi;

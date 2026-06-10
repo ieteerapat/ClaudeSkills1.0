@@ -67,13 +67,28 @@ drop / redirect), or dead on source (preserve + log; don't "fix" content).
 - Site-wide (Phase 4): full-route sweep, plus sitemap validity and internal
   link-graph integrity (no lost inbound paths to any migrated page).
 
+## Staging must be noindex (duplicate-content guard)
+
+While the rebuilt site runs on a staging domain in PARALLEL with the live
+source, it must be non-indexable or it competes with the source for the same
+SEO equity (duplicate content) — the exact thing this whole phase protects.
+- Staging emits `X-Robots-Tag: noindex, nofollow` (host header) AND a
+  `<meta name="robots" content="noindex,nofollow">`, plus a `Disallow: /`
+  robots.txt for the staging host.
+- Config flag `staging_noindex: true` (default). Cutover FLIPS it: production
+  emits indexable robots + the real sitemap. Flipping this is a checklist step,
+  never automatic — shipping a noindex tag to production silently de-indexes
+  the site (a catastrophic, easy-to-miss failure).
+
 ## Cutover (Phase 5 checklist)
 
 1. Deploy to staging; run smoke.mjs against staging (routes, redirects,
-   sitemap, console errors).
-2. Freshness spot-check: source pages modified since their captured_at →
+   sitemap, console errors). Confirm staging is noindex (above).
+2. FLIP noindex → indexable for production ONLY. Verify the production build
+   has NO `noindex` anywhere (smoke.mjs asserts this).
+3. Freshness spot-check: source pages modified since their captured_at →
    re-capture + re-verify those rows only.
-3. DNS flip (human). TTL lowered in advance.
-4. Post-launch watch: 404 logs daily for 2 weeks (every 404 = a missed
+4. DNS flip (human). TTL lowered in advance.
+5. Post-launch watch: 404 logs daily for 2 weeks (every 404 = a missed
    redirect → add it), Search Console coverage + CWV reports, re-submit
    sitemap. Keep the old host's uploads dir reachable until 404 logs go quiet.

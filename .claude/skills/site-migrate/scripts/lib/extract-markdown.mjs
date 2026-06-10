@@ -6,7 +6,7 @@ const RAWTEXT = new Set(['script', 'style', 'noscript', 'textarea']);
 const BLOCK = new Set(['address', 'article', 'aside', 'blockquote', 'div', 'dl', 'dd', 'dt', 'fieldset', 'figure', 'figcaption', 'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'hr', 'li', 'main', 'nav', 'ol', 'p', 'pre', 'section', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'ul', 'video', 'iframe', 'picture']);
 
 const ENTITIES = {
-  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', hellip: '…',
+  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', hellip: '…',
   mdash: '—', ndash: '–', lsquo: '‘', rsquo: '’', ldquo: '“', rdquo: '”',
   copy: '©', reg: '®', trade: '™', deg: '°', laquo: '«', raquo: '»', times: '×',
   middot: '·', bull: '•', shy: '', zwnj: '', zwj: '', eacute: 'é', egrave: 'è',
@@ -159,7 +159,18 @@ function escMd(t) {
   return t.replace(/[<{}]/g, (c) => ({ '<': '\\<', '{': '\\{', '}': '\\}' }[c]));
 }
 
-function collapse(t) { return t.replace(/\s+/g, ' '); }
+// collapse runs of whitespace EXCEPT U+00A0 — source nbsp is real content
+// (text parity compares it) and a markdown-significant flanking character
+function collapse(t) { return t.replace(/[^\S ]+/g, ' '); }
+
+// wrap inline content in emphasis markers, moving boundary whitespace OUTSIDE
+// the markers — `trusted<strong> link</strong>` must become `trusted **link**`,
+// not `trusted** link**` (broken flanking renders literal asterisks)
+function wrapInline(raw, marker) {
+  const m = raw.match(/^(\s*)([\s\S]*?)(\s*)$/);
+  if (!m || !m[2]) return '';
+  return m[1] + marker + m[2] + marker + m[3];
+}
 
 export function pickImgSrc(attrs) {
   // largest srcset candidate wins; else src; ignore data: URIs
@@ -208,19 +219,21 @@ function renderInline(nodes, ctx) {
       }
       case 'a': {
         const href = n.attrs.href || '';
-        const inner = renderInline(kids, ctx).trim();
-        if (!href || href.startsWith('javascript:')) { out += inner; break; }
-        out += inner ? `[${inner}](${ctx.rewriteUrl(href)})` : '';
+        const raw = renderInline(kids, ctx);
+        // boundary whitespace moves OUTSIDE the brackets — `At<strong><a> X</a>`
+        // must not lose the space (and `[ X]` breaks emphasis flanking)
+        const m = raw.match(/^(\s*)([\s\S]*?)(\s*)$/);
+        const inner = m ? m[2] : raw;
+        if (!href || href.startsWith('javascript:')) { out += raw; break; }
+        out += inner ? `${m[1]}[${inner}](${ctx.rewriteUrl(href)})${m[3]}` : '';
         break;
       }
       case 'strong': case 'b': {
-        const inner = renderInline(kids, ctx).trim();
-        out += inner ? `**${inner}**` : '';
+        out += wrapInline(renderInline(kids, ctx), '**');
         break;
       }
       case 'em': case 'i': case 'cite': case 'dfn': {
-        const inner = renderInline(kids, ctx).trim();
-        out += inner ? `*${inner}*` : '';
+        out += wrapInline(renderInline(kids, ctx), '*');
         break;
       }
       case 'code': case 'kbd': case 'var': {
@@ -229,8 +242,7 @@ function renderInline(nodes, ctx) {
         break;
       }
       case 'del': case 's': {
-        const inner = renderInline(kids, ctx).trim();
-        out += inner ? `~~${inner}~~` : '';
+        out += wrapInline(renderInline(kids, ctx), '~~');
         break;
       }
       case 'wbr': break;
@@ -241,12 +253,27 @@ function renderInline(nodes, ctx) {
   return out;
 }
 
+// ASCII-only trim — JS .trim() also strips U+00A0, but source nbsp-only
+// paragraphs are real content the texts dimension compares
+function trimMd(t) { return t.replace(/^[ \t\r\n\f]+|[ \t\r\n\f]+$/g, ''); }
+
+// inline style string → JSX style-object body: "font-size: 20px" → "fontSize: '20px'"
+function styleToJsx(style) {
+  return String(style).split(';').map((d) => d.trim()).filter(Boolean).map((d) => {
+    const i = d.indexOf(':');
+    if (i < 0) return null;
+    const prop = d.slice(0, i).trim().replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+    const val = d.slice(i + 1).trim().replace(/'/g, "\\'");
+    return `${prop}: '${val}'`;
+  }).filter(Boolean).join(', ');
+}
+
 function renderBlocks(nodes, ctx, depth) {
   const blocks = [];
   let inlineRun = [];
   const flush = () => {
     if (!inlineRun.length) return;
-    const text = renderInline(inlineRun, ctx).trim();
+    const text = trimMd(renderInline(inlineRun, ctx));
     if (text) blocks.push(text);
     inlineRun = [];
   };
@@ -265,10 +292,16 @@ function renderBlock(n, ctx, depth) {
   switch (n.tag) {
     case 'h1': case 'h2': case 'h3': case 'h4': case 'h5': case 'h6': {
       const text = renderInline(kids, ctx).trim();
-      return text ? `${'#'.repeat(+n.tag[1])} ${text}` : '';
+      if (!text) return '';
+      // Gutenberg content can carry inline styles (e.g. font-size) — they are
+      // CONTENT, not template CSS; preserve via JSX so MDX renders them
+      if (n.attrs?.style) {
+        return `<${n.tag} style={{${styleToJsx(n.attrs.style)}}}>${text}</${n.tag}>`;
+      }
+      return `${'#'.repeat(+n.tag[1])} ${text}`;
     }
     case 'p': {
-      return renderInline(kids, ctx).trim();
+      return trimMd(renderInline(kids, ctx));
     }
     case 'ul': case 'ol':
       return renderList(n, ctx, depth);

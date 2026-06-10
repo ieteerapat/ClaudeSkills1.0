@@ -16,6 +16,20 @@ server runtime. Optimize for fastest possible load; SEO equal-or-better.
   `public-assets/` (already downloaded/optimized by the media step).
 - No dynamic routes without `generateStaticParams`; every manifest route must
   statically resolve. API routes don't exist — forms follow config form_policy.
+- ARCHIVES / pagination (listing pages — blog, category, tag, date): content is
+  DERIVED from posts, not authored. Pre-generate every page (`page/2…N`) via
+  generateStaticParams so each paginated route exists statically. Parity for a
+  listing is a different shape: match the ITEM SET (which posts, in what order)
+  + counts + excerpts/thumbnails, not prose-body diffing. RULE: an archive is
+  parity-checked ONLY after every post it lists is `parity_passed` — its
+  member pages are a dependency. Until then it stays pending (not failed). The
+  loop should order archives after their members, or skip-and-revisit when a
+  member is still unmigrated. This compares like-for-like and avoids false
+  failures from half-migrated listings.
+- Third-party IDs/keys come from env vars (`NEXT_PUBLIC_*` for public Tier-1
+  IDs like GTM/GA; `.env.local` for Tier-2/3) — NEVER hardcode a key in a
+  component. See references/integrations.md + migration/integrations.json.
+  GTM/GA via @next/third-parties or a Script with `strategy="afterInteractive"`.
 
 ## Structure
 
@@ -25,19 +39,36 @@ server runtime. Optimize for fastest possible load; SEO equal-or-better.
   locale URL structure as literal route segments (e.g. `app/[locale]/...` with
   generateStaticParams over config locales, or duplicated trees if structures
   differ per locale). hreflang emitted per page from the url-map.
+- RTL: for any locale in config `rtl_locales` (ar/he/fa/ur…), render
+  `<html dir="rtl" lang="…">` and use logical CSS / Tailwind `rtl:` variants
+  and `ms-`/`me-` (inline-start/end) utilities — never hardcoded left/right.
+  The source already serves RTL for these locales, so the captured fixture is
+  RTL; an LTR-built RTL page simply fails parity against its own fixture (the
+  gate working correctly). No parity-harness change is needed.
 - Per-type templates (Phase 1.5): one layout component per manifest `type`.
   Pages compose template + shared chrome + MDX body. The first page of a type
   defines the template; later pages of that type reuse it unchanged.
 
 ## Design tokens (Phase 1.5)
 
-- From fixture computed styles: palette → `theme.colors` (use the SOURCE's
-  exact hex values — C.I. fidelity, no Tailwind default approximations),
-  font families/scale → `theme.fontFamily`/`fontSize`, spacing, breakpoints
-  matched to the source's actual responsive breakpoints (from capture
-  viewports), container widths.
+- Source = `fixtures/<id>/authored-css.json` (AUTHORED values), NOT computed
+  styles. It carries: `custom_properties` (the source's token system — map
+  these into `theme` keeping the relationships and, where useful, the names),
+  `type_scale` (rem/em — preserve the unit, don't bake to px), `spacing`,
+  `breakpoints` (the REAL media-query breakpoints → `theme.screens`, not the
+  capture viewports), `font_faces` (self-host these), and `fetched_sheets`
+  (raw CSS from cross-origin theme/CDN sheets for anything not in the above).
+- Palette → `theme.colors` from the source's exact values (C.I. fidelity, no
+  Tailwind default approximations). Computed `styles.json` is a cross-check
+  for values the authored CSS leaves implicit, never the primary source.
 - Fonts: self-host (download WOFF2, `next/font/local` or @font-face +
   preload). Never hotlink source-domain fonts; Google Fonts via next/font.
+- MULTI-SCRIPT payload (Latin + Thai + Arabic + CJK): naive self-hosting of all
+  @font-face files tanks the perf gate — CJK faces are MBs. Subset per script
+  and gate with `unicode-range` so a browser downloads only the script(s) a
+  page needs; load each locale's font only on that locale's routes. This is a
+  hard requirement when seo_bar=equal_or_better — the "fastest load" goal and a
+  multi-MB font payload are in direct conflict; subsetting resolves it.
 
 ## SEO mapping (per page — see also references/seo-rules.md)
 

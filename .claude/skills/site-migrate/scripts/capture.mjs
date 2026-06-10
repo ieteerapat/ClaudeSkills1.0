@@ -137,6 +137,65 @@ async function collectHead(page) {
   });
 }
 
+// Authored CSS — the design SYSTEM, not resolved px. getComputedStyle (used
+// for parity) flattens 1.5rem→24px and var(--x)/clamp() away; design-token
+// extraction (Phase 1.5) needs the authored values, so we read them from the
+// cascade itself: custom properties, @font-face, media-query breakpoints, and
+// the authored font-size/spacing declarations. Cross-origin sheets throw on
+// .cssRules — their hrefs are returned for a node-side fetch fallback.
+async function collectAuthoredCss(page) {
+  return page.evaluate(() => {
+    const rootCs = getComputedStyle(document.documentElement);
+    const custom_properties = {};
+    for (let i = 0; i < rootCs.length; i++) {
+      const p = rootCs[i];
+      if (p.startsWith('--')) custom_properties[p] = rootCs.getPropertyValue(p).trim();
+    }
+    const font_faces = [];
+    const breakpoints = new Set();
+    const type_scale = new Set();
+    const spacing = new Set();
+    const inaccessible_sheets = [];
+    const SPACING_PROPS = ['margin', 'margin-top', 'margin-bottom', 'margin-left', 'margin-right',
+      'padding', 'padding-top', 'padding-bottom', 'padding-left', 'padding-right', 'gap', 'row-gap', 'column-gap'];
+    const unitRe = /-?\d*\.?\d+(rem|em|px|%|vw|vh|ch)/g;
+    const walk = (rules) => {
+      for (const rule of rules) {
+        if (rule.type === CSSRule.FONT_FACE_RULE) {
+          font_faces.push({
+            family: rule.style.getPropertyValue('font-family').trim(),
+            src: rule.style.getPropertyValue('src').trim(),
+            weight: rule.style.getPropertyValue('font-weight').trim(),
+            style: rule.style.getPropertyValue('font-style').trim(),
+          });
+        } else if (rule.type === CSSRule.MEDIA_RULE) {
+          (rule.conditionText || rule.media?.mediaText || '').replace(/\d*\.?\d+(px|em|rem)/g, (m) => breakpoints.add(m));
+          walk(rule.cssRules);
+        } else if (rule.type === CSSRule.STYLE_RULE) {
+          const fs = rule.style.getPropertyValue('font-size').trim();
+          if (fs) type_scale.add(fs);
+          for (const sp of SPACING_PROPS) {
+            const v = rule.style.getPropertyValue(sp).trim();
+            if (v) (v.match(unitRe) || []).forEach((u) => spacing.add(u));
+          }
+        }
+      }
+    };
+    for (const sheet of document.styleSheets) {
+      try { walk(sheet.cssRules); }
+      catch { if (sheet.href) inaccessible_sheets.push(sheet.href); }
+    }
+    return {
+      custom_properties,
+      font_faces,
+      breakpoints: [...breakpoints],
+      type_scale: [...type_scale],
+      spacing: [...spacing],
+      inaccessible_sheets,
+    };
+  });
+}
+
 function looksLikeChallenge(title, status) {
   if (status === 403 || status === 503) return true;
   return /just a moment|attention required|access denied|checking your browser/i.test(title || '');
@@ -158,6 +217,7 @@ export async function capturePage(browser, { url, outDir, config, maskRules, thr
   let stylesJson = {};
   let a11y = null;
   let headJson = {};
+  let authoredCss = null;
   const sampleRects = {};
 
   for (let vi = 0; vi < viewports.length; vi++) {
@@ -202,6 +262,9 @@ export async function capturePage(browser, { url, outDir, config, maskRules, thr
       domRaw = await page.content();
       headJson = await collectHead(page).catch(() => ({}));
       try { a11y = await page.accessibility.snapshot(); } catch { a11y = null; }
+      // authored CSS = the design system (rem/clamp/tokens), source of truth
+      // for Phase 1.5; computed styles.json stays the parity source.
+      authoredCss = await collectAuthoredCss(page).catch(() => null);
     }
     await context.close();
   }
@@ -211,6 +274,21 @@ export async function capturePage(browser, { url, outDir, config, maskRules, thr
   writeJsonAtomic(join(outDir, 'styles.json'), stylesJson);
   writeJsonAtomic(join(outDir, 'a11y.json'), a11y);
   writeJsonAtomic(join(outDir, 'head.json'), headJson);
+
+  // node-side fetch fallback: cross-origin sheets that threw on .cssRules in
+  // the browser are still fetchable here (no CORS in node). Store raw text so
+  // the design-system phase can parse authored values from theme/CDN CSS.
+  if (authoredCss) {
+    const raw = {};
+    for (const href of (authoredCss.inaccessible_sheets || []).slice(0, 20)) {
+      try {
+        const r = await fetch(href, { headers: { 'user-agent': USER_AGENT } });
+        if (r.ok) raw[href] = (await r.text()).slice(0, 500000);
+      } catch { /* best effort */ }
+    }
+    authoredCss.fetched_sheets = raw;
+    writeJsonAtomic(join(outDir, 'authored-css.json'), authoredCss);
+  }
   // dedup + sort for determinism
   const harUniq = [...new Map(har.map((e) => [`${e.url}|${e.status}|${e.type}`, e])).values()]
     .sort((a, b) => (a.url < b.url ? -1 : a.url > b.url ? 1 : a.status - b.status));
