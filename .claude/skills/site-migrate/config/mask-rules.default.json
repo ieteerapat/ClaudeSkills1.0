@@ -1,0 +1,23 @@
+{
+  "comment": "Copied to PROJECT_ROOT/migration/mask-rules.json at intake. Applied by lib/normalize.mjs to BOTH sides before any diff. Every rule added during calibration/loop must include a reason and be logged.",
+  "strip_query_params": ["utm_*", "fbclid", "gclid", "ver", "v", "cache", "nocache", "_t"],
+  "mask_selectors": [
+    { "selector": "[data-timestamp], time[datetime]", "mode": "text", "reason": "live timestamps" },
+    { "selector": ".cookie-banner, #cookie-notice, [class*='consent']", "mode": "remove", "reason": "consent banners are capture noise; capture auto-dismisses, this is the backstop" }
+  ],
+  "mask_attribute_patterns": [
+    { "attr": "id", "pattern": "^(ember|react|radix|wp-block)-?\\d+$", "reason": "generated ids" },
+    { "attr": "class", "pattern": "^(is-visible|animated|aos-)", "reason": "animation state classes vary by capture timing" }
+  ],
+  "text_patterns": [
+    { "pattern": "\\b\\d{4}-\\d{2}-\\d{2}T[\\d:.]+Z?\\b", "replace": "<TIMESTAMP>", "reason": "ISO timestamps" },
+    { "pattern": "nonce=[a-f0-9]+", "replace": "nonce=<NONCE>", "reason": "WP nonces" }
+  ],
+  "remove_scripts": ["wp-emoji", "google-analytics", "gtag", "facebook", "hotjar"],
+  "freeze": {
+    "animations": true,
+    "carousels": "first-slide",
+    "lazyload": "force-eager",
+    "comment": "capture-time stabilization, applied identically on both sides"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "comment": "Copied to PROJECT_ROOT/migration/thresholds.json at intake. Tuned ONCE during calibration/pilot with human agreement; never loosened mid-loop to make a page pass.",
+  "viewports": [
+    { "name": "mobile", "width": 390, "height": 844 },
+    { "name": "tablet", "width": 768, "height": 1024 },
+    { "name": "desktop", "width": 1440, "height": 900 }
+  ],
+  "pixel_diff_pct": { "article": 1.0, "landing": 1.5, "policy": 0.5, "default": 1.0 },
+  "antialiasing_tolerance": 0.1,
+  "layout_shift_px": 8,
+  "text_similarity_min": 1.0,
+  "seo_meta": "exact",
+  "perf_budget": {
+    "enabled_when": "seo_bar == equal_or_better",
+    "metrics": ["LCP", "CLS", "TBT", "lighthouse_perf", "lighthouse_seo"],
+    "rule": "candidate >= source baseline (captured once at fixture time)",
+    "throttling": "lighthouse default mobile, identical both sides"
+  },
+  "nondeterminism_probe": {
+    "double_capture_on_first_attempt": true,
+    "disagreement_action": "needs_human"
+  }
+}

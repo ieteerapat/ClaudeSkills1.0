@@ -25,6 +25,12 @@ Repositories, tools, and docs **actually used** by this repo. Pruned to what the
 | HyperFrames Docs | Adapter runtimes, pipeline | https://hyperframes.heygen.com/introduction |
 | HyperFrames Catalog | Reusable blocks (`npx hyperframes add`) | https://hyperframes.heygen.com/catalog/blocks/data-chart |
 
+### site-migrate
+| Resource | Used for | Link |
+|---|---|---|
+| site-migrate-skill v1.1.0 | Vendored migration engine (SKILL.md, scripts, references) | local package: site-migrate-skill-v1.1.0 |
+| Playwright | Golden-fixture capture + visual parity in the skill's scripts | https://playwright.dev |
+
 ### session-memory
 | Resource | Used for | Link |
 |---|---|---|

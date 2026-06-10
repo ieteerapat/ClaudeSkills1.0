@@ -45,6 +45,11 @@ claude-code-mcp-optimizer/
 │               ├── animation-patterns.md # GSAP + adapter registration recipes
 │               ├── cli-reference.md       # Full CLI commands + prerequisites
 │               └── pipeline.md            # 7-step multi-beat video pipeline
+│       └── site-migrate/                 # Stack-agnostic site migration engine (vendored)
+│           ├── SKILL.md
+│           ├── config/                    # default mask-rules + thresholds
+│           ├── references/                # intake, seo, sources, targets, ci, etc.
+│           └── scripts/                   # intake/seed/capture/compare/extract/manifest (.mjs)
 ├── installers/
 │   ├── install-rtk.sh                     # RTK token-saver installer (macOS/Linux/WSL/Git Bash)
 │   ├── install-rtk.ps1                    # RTK installer (native Windows)
@@ -66,14 +71,15 @@ claude-code-mcp-optimizer/
 └── SOURCES.md                            # All research links
 ```
 
-## Skills (4 — validated against agentskills.io)
+## Skills (5 — validated against agentskills.io)
 
 | Skill | Version | Why It Passes | What It Does |
 |---|---|---|---|
 | `figma-accuracy` | 1.3.0 | Agent gets Figma implementation wrong 65-80% of the time without structured workflow | Enforces correct tool sequence, handles large designs, validates against screenshots, uses Code Connect, Code to Canvas |
 | `api-token-optimization` | 1.0.0 | Agent gets prompt-cache invalidation wrong (images break cache, volatile-before-breakpoint) without it | Direct Anthropic API cost cuts: prompt caching (90%), Batch API (50%), effort tuning, prefill — fills the API-side gap |
 | `session-memory` | 1.1.0 | Agent has no built-in way to persist state across compactions | Saves/restores work state to files so you never re-discover the same codebase |
-| `hyperframes-video` | 2.0.0 | Agent gets HyperFrames composition rules wrong (clip markers, paused timelines, registration) without them | Self-contained: create deterministic MP4 videos from HTML/CSS + GSAP. All authoring rules embedded, no plugin required. Reference files for animation, CLI, and pipeline |
+| `hyperframes-video` | 2.0.0 | Agent gets HyperFrames composition rules wrong (clip markers, paused timelines, registration) without them | Self-contained: create deterministic MP4 videos from HTML/CSS + GSAP. Reference files for animation, CLI, and pipeline |
+| `site-migrate` | 1.1.0 | Agent has no reliable parity-gated migration loop; without it "done" means "built" not "matches source" | Stack-agnostic site migration engine (WordPress/crawl → Next.js+Tailwind/Astro). Intake → golden-fixture capture (Playwright) → manifest-driven per-page loop → parity gate. Bundled scripts + references |
 
 See [CHANGELOG.md](./CHANGELOG.md) for version history.
 

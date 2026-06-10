@@ -11,6 +11,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com). Skills follow se
 | api-token-optimization | 1.0.0 | 2026-06-08 |
 | session-memory | 1.1.0 | 2026-06-08 |
 | hyperframes-video | 2.0.0 | 2026-06-05 |
+| site-migrate | 1.1.0 | 2026-06-08 |
+
+---
+
+## site-migrate
+
+### 1.1.0 — 2026-06-08
+- Vendored from site-migrate-skill v1.1.0 (30 files: SKILL.md, config/, references/, scripts/)
+- Stack-agnostic website migration engine: WordPress/generic-crawl → Next.js+Tailwind static or Astro
+- Phase-driven, manifest-routed loop; parity gate (a page is "done" only when it mechanically matches the captured source within tolerance)
+- v1.1.0 change vs 1.0.0: added "Lazy spawn (cost discipline)" guidance — spawn one page's subagent at a time, coordinate via on-disk state, never eager-fan-out the manifest
+- Bundled scripts (Playwright capture, visual compare, content extract, manifest/urlmap/smoke) run via node; some need their own deps (playwright) installed on first use
 
 ---
 
