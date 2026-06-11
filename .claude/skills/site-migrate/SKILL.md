@@ -89,33 +89,51 @@ hallucinating structure and drifting from the path.
   measured pilot actuals. User approves before widening. After approval, never
   prompt about cost again; include estimates in status reports instead.
 
-### Phase 3 — Unattended loop
+### Phase 3 — Unattended loop (locale-grouped, BUILD ONCE per logical page)
+Locales of one page share everything but TEXT and direction. Building each
+locale separately pays the expensive build subagent N× for near-identical
+components. So process a logical page as a GROUP: build the default locale
+ONCE (it establishes the shared `[locale]` route component), then sibling
+locales are a content swap + parity — NO build subagent. This is the single
+biggest token lever for multi-language migrations (≈ N× cut on builds).
 ```
-while manifest has {pending | failed(attempts<N) | needs_reverify}:
-  manifest.mjs claim                         # atomic
-  capture.mjs <id>     # fixtures + extract SAME moment (atomic pair), timestamped
-  extract.mjs <id>     # source adapter from config → content/
+while manifest has claimable {pending | failed(attempts<N) | needs_reverify}:
+  pick next claimable row → manifest.mjs siblings <id>   # the logical-page GROUP,
+                                                          # default locale first
+
+  # --- build leader: the DEFAULT-locale row (once per logical page) ---
+  claim → capture.mjs <id> → extract.mjs <id>
   BUILD: fresh subagent (cheap-tier where it can; see model tiering) with a
          SCOPED PACKET: manifest entry + extracted content +
-         migration/build-contract.md (the LAW) + the existing component
-         inventory it must reuse + acceptance criteria. Nothing else.
-         The subagent COMPOSES existing components into the page's template;
+         migration/build-contract.md (the LAW) + existing component inventory
+         + acceptance criteria. Nothing else. It COMPOSES existing components
+         into the page's template against a locale-agnostic `[locale]` route;
          it does NOT create shared components, rename, restructure, or invent
-         conventions. A page that genuinely needs a NEW shared component →
-         the subagent STOPS and flags it to the orchestrator (which decides
-         and updates the contract); it never adds one unilaterally.
+         conventions. Needs a NEW shared component → STOP and flag the
+         orchestrator (it decides + updates the contract); never add unilaterally.
   target build must succeed (counts as an attempt if not)
-  compare.mjs <id> <candidate-url> → exit code:
-    0 → manifest: parity_passed → git commit "migrate: <path>" → log
-    1 → DIAGNOSE (see MCP rules) → targeted fix → attempts++ (max N from config)
-    2 or N exhausted → manifest: needs_human → log → CONTINUE, never block
-    ≥3 → HARNESS ERROR: never a page verdict, never counts as an attempt →
-         read references/troubleshooting.md, fix the harness/env, re-run step
-  if build touched shared files (components/layouts/global css/config):
+  compare.mjs <id> <candidate-url> → 0 parity_passed+commit+log | 1 DIAGNOSE,
+    attempts++ (max N) | 2/N-exhausted needs_human+continue | ≥3 HARNESS ERROR
+    (never a verdict/attempt → references/troubleshooting.md, fix, re-run)
+
+  # --- sibling locales: content variants, NO rebuild ---
+  for each non-default locale row in the group:
+    claim → capture.mjs <id> → extract.mjs <id>
+    wire content/<locale>/<slug>.mdx into the EXISTING route; set dir=rtl for
+      config.rtl_locales. NO build subagent — the component already exists.
+    compare.mjs <id> <candidate-url> →
+      0 → parity_passed + commit + log
+      1 → if failure is TEXT/dir only → it's a content/extract fix (cheap,
+          no rebuild); if STRUCTURAL → DIAGNOSE (rare: locale broke the shared
+          component → fix once, mark-stale the group) → attempts++ (max N)
+      2/N → needs_human + continue
+
+  if the leader build touched shared files (components/layouts/global css/config):
     manifest.mjs mark-stale --touching <files>   # passed pages → needs_reverify
   append page log per references/logging.md
 ```
-One page at a time. needs_reverify pages re-run compare.mjs only.
+One logical page at a time; within it, build once then verify each locale.
+needs_reverify pages re-run compare.mjs only.
 
 Orchestration: prefer running this loop via the Workflow tool (deterministic
 script drives the loop; each page's build/diagnose is a fresh subagent

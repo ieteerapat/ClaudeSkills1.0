@@ -449,8 +449,20 @@ export async function stabilizePage(page, maskRules = {}) {
     }
   }, removeSelectors).catch(() => {});
 
-  // settle: fonts + a beat for layout
-  await page.evaluate(() => (document.fonts ? document.fonts.ready.then(() => undefined) : undefined)).catch(() => {});
+  // settle: fonts + IMAGE DECODE + a beat for layout. networkidle means bytes
+  // arrived, NOT that images are painted — without an explicit decode wait, a
+  // loaded-but-undecoded image yields intermittent pixel diffs (a false layout
+  // failure on a positionally-stable element, esp. deep/image-heavy mobile).
+  await page.evaluate(async () => {
+    if (document.fonts) { try { await document.fonts.ready; } catch {} }
+    const imgs = [...document.images].filter((im) => im.src && !im.src.startsWith('data:'));
+    await Promise.all(imgs.map(async (im) => {
+      try {
+        if (!im.complete) await new Promise((r) => { im.addEventListener('load', r, { once: true }); im.addEventListener('error', r, { once: true }); });
+        if (im.decode) await im.decode();
+      } catch { /* broken/cross-origin image — skip, don't block */ }
+    }));
+  }).catch(() => {});
   await page.waitForTimeout(300);
   await page.evaluate(() => window.scrollTo(0, 0)).catch(() => {});
 }

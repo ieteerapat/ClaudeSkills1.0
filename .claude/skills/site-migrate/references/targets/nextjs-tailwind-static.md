@@ -83,7 +83,11 @@ server runtime. Optimize for fastest possible load; SEO equal-or-better.
 - Zero client JS by default: Server Components everywhere; `'use client'` only
   for genuinely interactive islands (slider, form, locale switcher if needed).
 - No site-wide state libs, no CSS-in-JS runtime. Tailwind + static HTML.
-- Animations: prefer CSS (transitions/keyframes) recreated from fixture
-  computed styles; JS-driven source animations are needs_human per SKILL.md.
+- Animations: reproduce CSS motion from authored-css.json — copy the source
+  `@keyframes` VERBATIM (same names + step bodies) and reapply the same
+  animation/transition signatures (duration/easing/delay/property). The
+  `animations` parity dimension diffs these definitions (screenshots freeze
+  motion, so definitions are the only verifiable record). JS-driven source
+  animations (GSAP/sliders/scroll-triggers) → needs_human per SKILL.md.
 - Budget check is part of parity when seo_bar=equal_or_better: LCP/CLS/TBT and
   Lighthouse scores must be ≥ source baseline.

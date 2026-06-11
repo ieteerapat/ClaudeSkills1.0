@@ -198,6 +198,35 @@ function cmdGet(id) {
   console.log(JSON.stringify(row, null, 2));
 }
 
+// Logical-page key = target_path with a leading non-default locale segment
+// stripped, so all locale variants of one page share a key. Used to group
+// locale siblings for the build-once loop (build the default locale, then
+// siblings reuse the same route component — content swap, not rebuild).
+function logicalKey(row, config) {
+  const locales = (config.locales || []).filter((l) => l !== (config.default_locale || 'en'));
+  let p = String(row.target_path || row.source_path || '');
+  const m = p.match(/^\/([^/]+)(\/.*)?$/);
+  if (m && locales.includes(m[1])) p = m[2] || '/';
+  return p.replace(/\/+$/, '') || '/';
+}
+
+function cmdSiblings(id, flags) {
+  if (!id) die(3, 'usage: manifest.mjs siblings <id>');
+  const manifest = loadManifest();
+  const config = readConfigLoose();
+  const row = findRow(manifest, id);
+  const key = logicalKey(row, config);
+  const def = config.default_locale || 'en';
+  const sibs = manifest.pages
+    .filter((r) => logicalKey(r, config) === key)
+    .sort((a, b) => (a.locale === def ? -1 : b.locale === def ? 1 : a.locale < b.locale ? -1 : 1));
+  if (flags.json) { console.log(JSON.stringify(sibs, null, 2)); return; }
+  summary([
+    `logical page: ${key} (${sibs.length} locales)`,
+    ...sibs.map((r) => `  ${r.locale === def ? '*' : ' '} ${r.id}\t${r.locale}\t${r.status}`),
+  ]);
+}
+
 function cmdClaim(id, flags) {
   if (!id || !flags.by) die(3, 'usage: manifest.mjs claim <id> --by <agent>');
   withLock(() => {
@@ -370,11 +399,12 @@ switch (cmd) {
   case 'status': cmdStatus(flags); break;
   case 'next': cmdNext(flags); break;
   case 'get': cmdGet(pos[0]); break;
+  case 'siblings': cmdSiblings(pos[0], flags); break;
   case 'claim': cmdClaim(pos[0], flags); break;
   case 'set': cmdSet(pos[0], pos[1], pos[2]); break;
   case 'add-rows': cmdAddRows(flags); break;
   case 'mark-stale': cmdMarkStale(flags); break;
   case 'estimate': cmdEstimate(flags); break;
   default:
-    die(3, 'usage: manifest.mjs <status|next|get|claim|set|add-rows|mark-stale|estimate> [...]');
+    die(3, 'usage: manifest.mjs <status|next|get|siblings|claim|set|add-rows|mark-stale|estimate> [...]');
 }

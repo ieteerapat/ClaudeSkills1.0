@@ -44,6 +44,18 @@ Subagents treat it as read-only law.
    translate content. Anything requiring one of these → STOP and flag the
    orchestrator.
 
+## Locale siblings are content variants, NEVER rebuilds
+
+A logical page's locales (en/zh/ar/…) share the SAME route component, layout,
+template, components, CSS, and media — only TEXT and direction differ. Build
+the page ONCE (default locale) against a locale-agnostic `[locale]` route that
+reads `content/<locale>/<slug>.mdx`. Sibling locales then need NO build
+subagent: wire their MDX into the existing route, set `dir=rtl` for RTL
+locales, and verify. A sibling failing parity on TEXT is a content/extract fix,
+not a rebuild; only a STRUCTURAL failure (a locale's content broke the shared
+component) warrants diagnosis — and the fix is to the shared component once,
+not a per-locale fork. Media is downloaded once and shared across locales.
+
 ## Escalation (the safety valve)
 
 A page that genuinely cannot be built by composing the existing kit (needs a

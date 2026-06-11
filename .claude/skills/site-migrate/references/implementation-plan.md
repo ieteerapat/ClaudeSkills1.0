@@ -26,7 +26,9 @@ a verify gate before the next (Karpathy: goal-driven, verifiable).
 ## CLI contracts
 
 - `manifest.mjs status` → counts by status + phase hint + estimates (if pilot
-  data exists). `next` → one claimable row. `get <id>` → one row.
+  data exists). `next` → one claimable row. `get <id>` → one row. `siblings
+  <id>` → all locale variants of the logical page (default first) — drives the
+  build-once locale-grouped loop.
   `claim <id> --by <agent>` → atomic or fail. `set <id> <field> <value>` —
   REFUSES status=parity_passed unless reports/<id>/parity-report.json exists,
   verdict=pass, compared_at > last build touch (code-level gate; hook is

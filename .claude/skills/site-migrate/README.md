@@ -1,10 +1,34 @@
-# site-migrate — Claude Code skill (v1.5)
+# site-migrate — Claude Code skill (v1.8)
 
 Stack-agnostic website migration engine for Claude Code. Migrates a site to a
 new stack (e.g. WordPress → Next.js/Tailwind static, or → Astro) with near-zero
 human intervention: intake-first configuration, golden-fixture capture via
 Playwright, manifest-driven per-page loop, and a parity gate — a page is never
 "done" until it mechanically matches the captured source within tolerance.
+
+## v1.8 highlights
+
+- **Locale-grouped, build-once loop** — the biggest token lever for
+  multi-language sites. Locales of a page share everything but text + direction,
+  so the page is built ONCE (default locale, shared `[locale]` route) and
+  sibling locales are a content swap + parity, no build subagent. New
+  `manifest.mjs siblings <id>` groups the locale variants. For a 6-locale site
+  that's ≈6× fewer expensive builds.
+
+## v1.7 highlights
+
+- **Image-decode stabilization** — capture now awaits every image's load +
+  `decode()` (plus `document.fonts.ready`) before screenshotting. `networkidle`
+  only means bytes arrived, not painted; without this, loaded-but-undecoded
+  images caused intermittent false layout diffs (esp. deep/image-heavy mobile).
+  Verified: en-home mobile layout self-parity 2.09% → 0%, all 7 dimensions pass.
+
+## v1.6 highlights
+
+- **Animation/transition parity** — captures `@keyframes` + animation/transition
+  signatures from authored CSS (screenshots freeze motion, so definitions are
+  the only verifiable record) and adds an `animations` parity dimension.
+  Validated: 6 keyframes + 20 motions checked, self-parity passes.
 
 ## v1.5 highlights
 

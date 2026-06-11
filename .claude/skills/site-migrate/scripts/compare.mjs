@@ -15,7 +15,7 @@ import {
 import { extractText } from './lib/normalize.mjs';
 import { capturePage, loadTunables } from './capture.mjs';
 
-const ALL_DIMENSIONS = ['layout', 'fonts', 'texts', 'seo_meta', 'links', 'media'];
+const ALL_DIMENSIONS = ['layout', 'fonts', 'texts', 'seo_meta', 'links', 'media', 'animations'];
 
 function enabledDimensions(config) {
   const f = config.fidelity;
@@ -361,9 +361,40 @@ async function runDimensions(ctx, dims) {
     else if (d === 'seo_meta') out.seo_meta = compareSeoMeta(ctx);
     else if (d === 'media') out.media = compareMedia(ctx);
     else if (d === 'fonts') out.fonts = compareFonts(ctx);
+    else if (d === 'animations') out.animations = compareAnimations(ctx);
   }
   return out;
 }
+
+// Motion can't be pixel-diffed (screenshots freeze it), so we compare the
+// authored DEFINITIONS: every @keyframes the source defines must exist in the
+// candidate with an identical step definition, and every animation/transition
+// signature (selector-independent set) must be reproduced. JS-driven motion
+// (GSAP/sliders) leaves no CSS here → handled by the needs_human policy, not this.
+function compareAnimations({ fixtureDir, candDir }) {
+  const sa = readJson(join(fixtureDir, 'authored-css.json'), null);
+  const ca = readJson(join(candDir, 'authored-css.json'), null);
+  if (!sa || !ca) return { pass: true, skipped: 'no authored-css.json on one side' };
+  const skf = sa.keyframes || {}; const ckf = ca.keyframes || {};
+  const missingKf = Object.keys(skf).filter((n) => norm(ckf[n]) !== norm(skf[n]));
+  const sMotion = new Set(sa.motion || []); const cMotion = new Set(ca.motion || []);
+  const missingMotion = [...sMotion].filter((m) => !cMotion.has(m));
+  const pass = missingKf.length === 0 && missingMotion.length === 0;
+  const dim = {
+    pass,
+    keyframes_checked: Object.keys(skf).length,
+    motions_checked: sMotion.size,
+  };
+  if (!pass) {
+    dim.missing_keyframes = missingKf.slice(0, 5);
+    dim.missing_motion = missingMotion.slice(0, 5);
+    dim.worst_offender = missingKf.length
+      ? `@keyframes ${missingKf[0]} missing/altered`
+      : `motion not reproduced: ${missingMotion[0]}`;
+  }
+  return dim;
+}
+function norm(s) { return (s || '').replace(/\s+/g, ' ').trim(); }
 
 function describeFailure(name, dim) {
   const where = [dim.selector, dim.worst_region, dim.viewport && `@${dim.viewport}`].filter(Boolean).join(' ');

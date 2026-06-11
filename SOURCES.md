@@ -28,7 +28,7 @@ Repositories, tools, and docs **actually used** by this repo. Pruned to what the
 ### site-migrate
 | Resource | Used for | Link |
 |---|---|---|
-| site-migrate-skill v1.5.0 | Vendored migration engine (SKILL.md, scripts, references) | local package: site-migrate-skill-v1.5.0 |
+| site-migrate-skill v1.8.0 | Vendored migration engine (SKILL.md, scripts, references) | local package: site-migrate-skill-v1.8.0 |
 | Playwright | Golden-fixture capture + visual parity in the skill's scripts | https://playwright.dev |
 
 ### session-memory

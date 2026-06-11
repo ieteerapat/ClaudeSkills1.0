@@ -11,11 +11,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com). Skills follow se
 | api-token-optimization | 1.0.0 | 2026-06-08 |
 | session-memory | 1.1.0 | 2026-06-08 |
 | hyperframes-video | 2.0.0 | 2026-06-05 |
-| site-migrate | 1.5.0 | 2026-06-08 |
+| site-migrate | 1.8.0 | 2026-06-08 |
 
 ---
 
 ## site-migrate
+
+### 1.8.0 — 2026-06-08
+- Updated from vendored site-migrate-skill v1.8.0 (32 files)
+- Changed: SKILL.md, references/build-contract.md, references/implementation-plan.md, scripts/manifest.mjs
+- Installed to global `~/.claude/skills/` on this machine
 
 ### 1.5.0 — 2026-06-08
 - Updated from vendored site-migrate-skill v1.5.0 (32 files, +2 vs v1.1.0)

@@ -34,6 +34,8 @@ ONLY the `summary` block.
       "seo_meta": { "pass": true },
       "links":    { "pass": true },
       "media":    { "pass": true },
+      "animations": { "pass": true, "keyframes_checked": 6, "motions_checked": 20,
+                      "missing_keyframes": [], "missing_motion": [] },
       "perf":     { "pass": true, "source_lcp_ms": 2400, "candidate_lcp_ms": 900 }
     },
     "next_action_hint": "inspect .hero-slider computed styles on both sides"
@@ -56,3 +58,9 @@ ONLY the `summary` block.
 - A dimension only appears if enabled in config `fidelity`.
 - perf appears only when `seo_bar` = equal_or_better; pass = candidate ≥ source
   on the budgeted metrics (LCP, CLS, TBT, Lighthouse SEO/Perf scores).
+- animations compares authored-css.json DEFINITIONS (screenshots freeze motion):
+  every source @keyframes must exist in the candidate with an identical step
+  body, and every animation/transition signature (selector-independent set)
+  must be reproduced. Verifies CSS-defined motion only; JS-driven motion
+  (GSAP/sliders/scroll-triggers) leaves no CSS here and is routed to
+  needs_human by the animation-surface policy, not this dimension.

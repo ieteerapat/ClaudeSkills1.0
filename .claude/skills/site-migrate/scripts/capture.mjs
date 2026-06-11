@@ -155,10 +155,13 @@ async function collectAuthoredCss(page) {
     const breakpoints = new Set();
     const type_scale = new Set();
     const spacing = new Set();
+    const keyframes = {};        // name → normalized step definition (motion, not in a static screenshot)
+    const motion = new Set();    // normalized animation/transition signatures, selector-independent
     const inaccessible_sheets = [];
     const SPACING_PROPS = ['margin', 'margin-top', 'margin-bottom', 'margin-left', 'margin-right',
       'padding', 'padding-top', 'padding-bottom', 'padding-left', 'padding-right', 'gap', 'row-gap', 'column-gap'];
     const unitRe = /-?\d*\.?\d+(rem|em|px|%|vw|vh|ch)/g;
+    const norm = (s) => (s || '').replace(/\s+/g, ' ').trim();
     const walk = (rules) => {
       for (const rule of rules) {
         if (rule.type === CSSRule.FONT_FACE_RULE) {
@@ -171,6 +174,12 @@ async function collectAuthoredCss(page) {
         } else if (rule.type === CSSRule.MEDIA_RULE) {
           (rule.conditionText || rule.media?.mediaText || '').replace(/\d*\.?\d+(px|em|rem)/g, (m) => breakpoints.add(m));
           walk(rule.cssRules);
+        } else if (rule.type === CSSRule.KEYFRAMES_RULE) {
+          // @keyframes — the motion definition. Screenshots can't see it (frozen),
+          // so this authored record is the only verifiable source.
+          const steps = [];
+          for (const kf of rule.cssRules) steps.push(`${kf.keyText}{${norm(kf.style.cssText)}}`);
+          keyframes[rule.name] = steps.join(' ');
         } else if (rule.type === CSSRule.STYLE_RULE) {
           const fs = rule.style.getPropertyValue('font-size').trim();
           if (fs) type_scale.add(fs);
@@ -178,6 +187,12 @@ async function collectAuthoredCss(page) {
             const v = rule.style.getPropertyValue(sp).trim();
             if (v) (v.match(unitRe) || []).forEach((u) => spacing.add(u));
           }
+          // animation/transition signatures — selector-independent (class names
+          // differ across stacks; the SET of motions is what must be reproduced)
+          const anim = norm(rule.style.getPropertyValue('animation') || rule.style.getPropertyValue('animation-name'));
+          const trans = norm(rule.style.getPropertyValue('transition') || rule.style.getPropertyValue('transition-property'));
+          if (anim && anim !== 'none') motion.add(`animation:${anim}`);
+          if (trans && trans !== 'none' && trans !== 'all 0s ease 0s') motion.add(`transition:${trans}`);
         }
       }
     };
@@ -191,6 +206,8 @@ async function collectAuthoredCss(page) {
       breakpoints: [...breakpoints],
       type_scale: [...type_scale],
       spacing: [...spacing],
+      keyframes,
+      motion: [...motion],
       inaccessible_sheets,
     };
   });
