@@ -20,7 +20,7 @@ Repositories, tools, and docs **actually used** by this repo. Pruned to what the
 ### hyperframes-video
 | Resource | Used for | Link |
 |---|---|---|
-| HyperFrames (repo) | Source framework (Apache 2.0, v0.6.73) | https://github.com/heygen-com/hyperframes |
+| HyperFrames (repo) | Source framework (Apache 2.0, v0.7.6) | https://github.com/heygen-com/hyperframes |
 | HyperFrames Quickstart | Composition rules + CLI workflow | https://hyperframes.heygen.com/quickstart |
 | HyperFrames Docs | Adapter runtimes, pipeline | https://hyperframes.heygen.com/introduction |
 | HyperFrames Catalog | Reusable blocks (`npx hyperframes add`) | https://hyperframes.heygen.com/catalog/blocks/data-chart |

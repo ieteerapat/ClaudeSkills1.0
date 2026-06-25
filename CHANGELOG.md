@@ -10,7 +10,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com). Skills follow se
 | figma-accuracy | 1.3.0 | 2026-06-08 |
 | api-token-optimization | 1.0.0 | 2026-06-08 |
 | session-memory | 1.1.0 | 2026-06-08 |
-| hyperframes-video | 2.0.0 | 2026-06-05 |
+| hyperframes-video | 2.1.0 | 2026-06-08 |
 | site-migrate | 1.8.0 | 2026-06-08 |
 
 ---
@@ -73,6 +73,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com). Skills follow se
 ---
 
 ## hyperframes-video
+
+### 2.1.0 — 2026-06-08
+- Metadata refresh: upstream reference bumped v0.6.73 → v0.7.6 (latest hyperframes release)
+- No content change needed — the core composition rules the skill teaches (clip markers, paused/registered timelines, data attributes) are framework fundamentals, stable across the minor bump. Verified still accurate.
 
 ### 2.0.0 — 2026-06-05
 - Reworked into a self-contained local skill — no plugin/upstream install required

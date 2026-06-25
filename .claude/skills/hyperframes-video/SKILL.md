@@ -2,10 +2,10 @@
 name: hyperframes-video
 description: Create deterministic MP4 videos from HTML/CSS and seekable animations using the HyperFrames framework. Self-contained — no plugin required. Use whenever the user wants to generate a video, animation, product intro, social clip, data viz, chart race, captions, lower-thirds, or docs-to-video / PDF-to-video / website-to-video, or mentions hyperframes, GSAP timelines, or composition rendering.
 metadata:
-  version: "2.0.0"
-  last-updated: "2026-06-05"
+  version: "2.1.0"
+  last-updated: "2026-06-08"
   author: ieteerapat
-  based-on: heygen-com/hyperframes v0.6.73
+  based-on: heygen-com/hyperframes v0.7.6
 ---
 
 # HyperFrames Video (Local Skill)
@@ -228,4 +228,4 @@ Add a lower third at 0:03 with my name and title.
 
 ## Source
 
-Based on heygen-com/hyperframes (Apache 2.0, v0.6.73). Docs: https://hyperframes.heygen.com/introduction · GitHub: https://github.com/heygen-com/hyperframes
+Based on heygen-com/hyperframes (Apache 2.0, v0.7.6). Docs: https://hyperframes.heygen.com/introduction · GitHub: https://github.com/heygen-com/hyperframes
