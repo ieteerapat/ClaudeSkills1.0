@@ -37,6 +37,12 @@ Repositories, tools, and docs **actually used** by this repo. Pruned to what the
 | nutlope/hallmark v1.1.0 | Vendored anti-AI-slop design skill (MIT, Together AI) | https://github.com/nutlope/hallmark |
 | usehallmark.com | Live demo + theme gallery | https://www.usehallmark.com |
 
+### security-review
+| Resource | Used for | Link |
+|---|---|---|
+| anthropics/claude-code-security-review | Official methodology the skill is authored from | https://github.com/anthropics/claude-code-security-review |
+| Anthropic: automate security reviews | Background on the approach | https://www.anthropic.com/news/automate-security-reviews-with-claude-code |
+
 ### session-memory
 | Resource | Used for | Link |
 |---|---|---|

@@ -13,6 +13,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com). Skills follow se
 | hyperframes-video | 2.1.0 | 2026-06-08 |
 | site-migrate | 1.8.0 | 2026-06-08 |
 | hallmark | 1.1.0 | 2026-06-08 |
+| security-review | 1.0.0 | 2026-06-08 |
+
+---
+
+## security-review
+
+### 1.0.0 — 2026-06-08
+- Authored from Anthropic's claude-code-security-review methodology (that repo is a GitHub Action + slash command, not a vendorable SKILL.md)
+- High-confidence (>80%), diff-aware security review: trace input→sink, categories for injection/authz/crypto/deserialization/XSS/SSRF
+- Explicit exclusions (DoS, on-disk secrets, theoretical) to cut noise; severity-rated findings with exploit scenario + fix
+- Notes the official GitHub Action for CI PR scanning
+- Installed to global ~/.claude/skills/ on this machine
 
 ---
 

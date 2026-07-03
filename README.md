@@ -71,7 +71,7 @@ claude-code-mcp-optimizer/
 └── SOURCES.md                            # All research links
 ```
 
-## Skills (6 — validated against agentskills.io)
+## Skills (7 — validated against agentskills.io)
 
 | Skill | Version | Why It Passes | What It Does |
 |---|---|---|---|
@@ -81,6 +81,7 @@ claude-code-mcp-optimizer/
 | `hyperframes-video` | 2.1.0 | Agent gets HyperFrames composition rules wrong (clip markers, paused timelines, registration) without them | Self-contained: create deterministic MP4 videos from HTML/CSS + GSAP. Reference files for animation, CLI, and pipeline |
 | `site-migrate` | 1.8.0 | Agent has no reliable parity-gated migration loop; without it "done" means "built" not "matches source" | Stack-agnostic site migration engine (WordPress/crawl → Next.js+Tailwind/Astro). Intake → golden-fixture capture (Playwright) → manifest-driven per-page loop → parity gate. Bundled scripts + references |
 | `hallmark` | 1.1.0 | Agent produces generic "AI-slop" UI by default (same fonts, blue palette, accent lines) | Anti-AI-slop design skill (Together AI, MIT). 20 themes + Custom, 57 slop-test gates. Verbs: build / audit / redesign / study. Self-contained HTML+CSS output |
+| `security-review` | 1.0.0 | Agent does ad-hoc security review; without a structured procedure it misses injection/authz paths or floods noise | High-confidence, diff-aware security review (Anthropic methodology). Traces input→sink, checks injection/authz/crypto/deser, >80% confidence gate, severity-rated findings |
 
 See [CHANGELOG.md](./CHANGELOG.md) for version history.
 
