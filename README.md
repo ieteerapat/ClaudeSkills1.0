@@ -71,7 +71,7 @@ claude-code-mcp-optimizer/
 └── SOURCES.md                            # All research links
 ```
 
-## Skills (5 — validated against agentskills.io)
+## Skills (6 — validated against agentskills.io)
 
 | Skill | Version | Why It Passes | What It Does |
 |---|---|---|---|
@@ -80,6 +80,7 @@ claude-code-mcp-optimizer/
 | `session-memory` | 1.1.0 | Agent has no built-in way to persist state across compactions | Saves/restores work state to files so you never re-discover the same codebase |
 | `hyperframes-video` | 2.1.0 | Agent gets HyperFrames composition rules wrong (clip markers, paused timelines, registration) without them | Self-contained: create deterministic MP4 videos from HTML/CSS + GSAP. Reference files for animation, CLI, and pipeline |
 | `site-migrate` | 1.8.0 | Agent has no reliable parity-gated migration loop; without it "done" means "built" not "matches source" | Stack-agnostic site migration engine (WordPress/crawl → Next.js+Tailwind/Astro). Intake → golden-fixture capture (Playwright) → manifest-driven per-page loop → parity gate. Bundled scripts + references |
+| `hallmark` | 1.1.0 | Agent produces generic "AI-slop" UI by default (same fonts, blue palette, accent lines) | Anti-AI-slop design skill (Together AI, MIT). 20 themes + Custom, 57 slop-test gates. Verbs: build / audit / redesign / study. Self-contained HTML+CSS output |
 
 See [CHANGELOG.md](./CHANGELOG.md) for version history.
 

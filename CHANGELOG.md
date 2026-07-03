@@ -12,6 +12,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com). Skills follow se
 | session-memory | 1.1.0 | 2026-06-08 |
 | hyperframes-video | 2.1.0 | 2026-06-08 |
 | site-migrate | 1.8.0 | 2026-06-08 |
+| hallmark | 1.1.0 | 2026-06-08 |
+
+---
+
+## hallmark
+
+### 1.1.0 — 2026-06-08
+- Vendored from nutlope/hallmark v1.1.0 (MIT, Together AI; 106 files: SKILL.md + references/)
+- Anti-AI-slop design skill: 20 themes + Custom route, 57 slop-test gates + pre-emit self-critique
+- Verbs: build (default) / audit / redesign / study (extract design DNA from URL or screenshot)
+- Output: self-contained HTML + CSS, macrostructure stamped in CSS comment
+- Installed to global ~/.claude/skills/ on this machine
 
 ---
 

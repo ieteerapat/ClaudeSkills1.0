@@ -31,6 +31,12 @@ Repositories, tools, and docs **actually used** by this repo. Pruned to what the
 | site-migrate-skill v1.8.0 | Vendored migration engine (SKILL.md, scripts, references) | local package: site-migrate-skill-v1.8.0 |
 | Playwright | Golden-fixture capture + visual parity in the skill's scripts | https://playwright.dev |
 
+### hallmark
+| Resource | Used for | Link |
+|---|---|---|
+| nutlope/hallmark v1.1.0 | Vendored anti-AI-slop design skill (MIT, Together AI) | https://github.com/nutlope/hallmark |
+| usehallmark.com | Live demo + theme gallery | https://www.usehallmark.com |
+
 ### session-memory
 | Resource | Used for | Link |
 |---|---|---|

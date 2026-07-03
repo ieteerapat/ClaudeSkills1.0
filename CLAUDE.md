@@ -67,3 +67,4 @@
 - `session-memory` — persist/restore context across compactions via the vault
 - `hyperframes-video` — author HTML→MP4 videos (self-contained, no plugin)
 - `site-migrate` — stack-agnostic site migration with parity gate (WordPress/crawl → Next.js/Astro)
+- `hallmark` — anti-AI-slop UI design (build/audit/redesign/study; 20 themes, self-contained HTML+CSS)
